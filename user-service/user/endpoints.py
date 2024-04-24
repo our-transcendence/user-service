@@ -5,7 +5,8 @@ from user.models import User
 
 import json
 
-@csrf_exempt # TODO: Not use in production
+
+@csrf_exempt  # TODO: Not use in production
 @require_POST
 def create_user(request):
     try:
