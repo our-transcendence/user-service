@@ -12,9 +12,11 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 from pathlib import Path
 
+import ourJWT
+import requests
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -26,7 +28,6 @@ SECRET_KEY = 'django-insecure-25xils$5ig0gmm)5(jq@!#@qrzo*&bd)3)x$nxy4+q^8z7)pj=
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -70,17 +71,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'userService.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_DB'),
-        'HOST': 'postgres',
-        'USER': os.environ.get('POSTGRES_USER'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'NAME': os.environ.get('POSTGRES_DB', 'postgres_db'),
+        'HOST': '127.0.0.1',
+        'USER': os.environ.get('POSTGRES_USER', 'postgres_user'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'postgres_password'),
         'PORT': '5432',
     }
 }
@@ -104,7 +104,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
@@ -116,7 +115,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
@@ -126,3 +124,10 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+PICTURES_DST = "/home/beroux/goinfre/pictures"
+
+pub_key_request = requests.get("https://localhost:4444/public_key", verify=False)
+if pub_key_request.status_code != 200:
+    raise Exception("Failed to get public key")
+ourJWT.Decoder.pub_key = pub_key_request.text
