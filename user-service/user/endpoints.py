@@ -12,6 +12,7 @@ from userService import settings
 @csrf_exempt  # TODO: Not use in production
 @require_POST
 def create_user(request):
+    print(request.body, flush=True)
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError:
