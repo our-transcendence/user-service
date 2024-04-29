@@ -12,9 +12,11 @@ from userService import settings
 @csrf_exempt  # TODO: Not use in production
 @require_POST
 def create_user(request):
+    print(request.body, flush=True)
     try:
         data = json.loads(request.body)
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
+        print (e, flush=True)
         return response.HttpResponse(status=400, reason="Bad Json content: Decode Error")
 
     expected_keys = {"id", "login"}
