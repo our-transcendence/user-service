@@ -102,7 +102,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get('POSTGRES_DB', 'postgres_db'),
-        'HOST': '127.0.0.1',
+        'HOST': 'postgres',
         'USER': os.environ.get('POSTGRES_USER', 'postgres_user'),
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'postgres_password'),
         'PORT': '5432',
@@ -151,7 +151,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 PICTURES_DST = "/home/beroux/goinfre/pictures"
 
-pub_key_request = requests.get("https://localhost:4444/public_key", verify=False)
+pub_key_request = requests.get("https://auth-nginx:4444/public_key", verify=False)
 if pub_key_request.status_code != 200:
     raise Exception("Failed to get public key")
 ourJWT.Decoder.pub_key = pub_key_request.text
