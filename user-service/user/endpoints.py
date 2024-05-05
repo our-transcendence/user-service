@@ -5,6 +5,7 @@ from django.views.decorators.http import require_POST, require_http_methods
 from user.models import User
 
 import json
+import requests
 
 from userService import settings
 
@@ -68,3 +69,21 @@ def update_user(request: HttpRequest, user_id):
 def get_picture(request, user_id):
     with open(f"{settings.PICTURES_DST}/{user_id}.png", "rb") as f:
         return HttpResponse(f.read(), content_type="image/png")
+
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def delete_user(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return response.HttpResponse(status=404)
+    # TODO si on est pas authentifie, 401, unauthorized
+    try:
+        delete_response = requests.delete(f"{settings.AUTH_SERVICE_URL}/{user_id}/delete", verify=False)
+    except requests.exceptions.ConnectionError as e:
+        print(e)
+        return response.HttpResponse(status=400, reason="Cant connect to auth-service")
+    if delete_response.status_code != 200:
+        return response.HttpResponse(status=delete_response.status_code, reason=delete_response.text)
+    user.delete()
+    return response.HttpResponse()

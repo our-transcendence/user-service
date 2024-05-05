@@ -24,4 +24,5 @@ urlpatterns = [
     path('<int:user_id>/infos', endpoints.get_user),
     path('<int:user_id>/update', endpoints.update_user),
     path('<int:user_id>/picture', endpoints.get_picture),
+    path('<int:user_id>/delete', endpoints.delete_user),
 ]
