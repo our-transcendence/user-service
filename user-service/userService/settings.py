@@ -131,3 +131,5 @@ pub_key_request = requests.get("https://localhost:4444/public_key", verify=False
 if pub_key_request.status_code != 200:
     raise Exception("Failed to get public key")
 ourJWT.Decoder.pub_key = pub_key_request.text
+
+AUTH_SERVICE_URL = "https://auth-nginx:4444"
