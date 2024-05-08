@@ -1,5 +1,5 @@
 from django.db.models import Q
-from django.http import response, HttpRequest, HttpResponse
+from django.http import response, HttpRequest, HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
 from user.models import User
@@ -7,13 +7,16 @@ from user.models import User
 import json
 import requests
 
-from userService import settings
+import ourJWT.OUR_exception
 
+from userService import settings
+from ..utils import get_user_from_jwt
+
+NO_USER = 404, "No user found with given ID"
 
 @csrf_exempt  # TODO: Not use in production
 @require_POST
 def create_user(request):
-    print(request.body, flush=True)
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError as e:
@@ -46,12 +49,15 @@ def get_user(request, user_id):
 
 
 @csrf_exempt
+@ourJWT.Decoder.check_auth()
 @require_http_methods(["POST"])
-def update_user(request: HttpRequest, user_id):
+def update_user(request: HttpRequest, user_id, **kwargs):
     try:
-        user = User.objects.get(id=user_id)
-    except User.DoesNotExist:
-        return response.HttpResponse(status=404)
+        user = get_user_from_jwt(kwargs)
+    except Http404:
+        return response.HttpResponse(*NO_USER)
+    if user.id != user_id:
+        return response.HttpResponse(status=400, reason="User id isnt equal to user connected id")
     if 'picture' in request.FILES.keys():
         if request.FILES['picture'].content_type != 'image/png':
             return HttpResponse(status=400, reason="Only png images are allowed")
@@ -71,17 +77,18 @@ def get_picture(request, user_id):
         return HttpResponse(f.read(), content_type="image/png")
 
 @csrf_exempt
+@ourJWT.Decoder.check_auth()
 @require_http_methods(["DELETE"])
-def delete_user(request, user_id):
+def delete_user(request, user_id, **kwargs):
     try:
-        user = User.objects.get(id=user_id)
-    except User.DoesNotExist:
-        return response.HttpResponse(status=404)
-    # TODO si on est pas authentifie, 401, unauthorized
+        user = get_user_from_jwt(kwargs)
+    except Http404:
+        return response.HttpResponse(*NO_USER)
+    if user.id != user_id:
+        return response.HttpResponse(status=400, reason="User id isnt equal to user connected id")
     try:
         delete_response = requests.delete(f"{settings.AUTH_SERVICE_URL}/{user_id}/delete", verify=False)
     except requests.exceptions.ConnectionError as e:
-        print(e)
         return response.HttpResponse(status=400, reason="Cant connect to auth-service")
     if delete_response.status_code != 200:
         return response.HttpResponse(status=delete_response.status_code, reason=delete_response.text)
