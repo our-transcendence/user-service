@@ -100,3 +100,15 @@ def delete_user(request, user_id, **kwargs):
     user.delete()
     return response.HttpResponse()
 
+@csrf_exempt
+@ourJWT.Decoder.check_auth()
+@require_http_methods(["GET"])
+def get_friends(request, user_id, **kwargs):
+    try:
+        user = get_user_from_jwt(kwargs)
+    except Http404:
+        return response.HttpResponse(*NO_USER)
+    if user.id != user_id:
+        return response.HttpResponse(*BAD_IDS)
+    # get all the friends and return them
+    return response.HttpResponse()
