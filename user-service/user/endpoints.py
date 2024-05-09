@@ -13,6 +13,12 @@ from userService import settings
 from ..utils import get_user_from_jwt
 
 NO_USER = 404, "No user found with given ID"
+JSON_DECODE_ERROR = 400, "JSON Decode Error"
+JSON_BAD_KEYS = 400, "JSON Bad Keys"
+USER_EXISTS = 401, "User with this login already exists"
+BAD_IDS = 400, "User id is not equal with connected user id"
+CANT_CONNECT_AUTH = 408, "Cant connect to auth-service"
+ONLY_PNG = 400, "Only png images are allowed"
 
 @csrf_exempt  # TODO: Not use in production
 @require_POST
@@ -20,23 +26,22 @@ def create_user(request):
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError as e:
-        print (e, flush=True)
-        return response.HttpResponse(status=400, reason="Bad Json content: Decode Error")
+        return response.HttpResponse(*JSON_DECODE_ERROR)
 
     expected_keys = {"id", "login"}
     if set(data.keys()) != expected_keys:
-        return response.HttpResponse(status=400, reason="Bad Json content: Bad Keys")
+        return response.HttpResponse(*JSON_DECODE_ERROR)
 
     user_id = data["id"]
     login = data["login"]
 
     if User.objects.filter(Q(login=login) | Q(id=user_id)).exists():
-        return response.HttpResponse(status=401, reason="User with this login already exists")
+        return response.HttpResponse(*USER_EXISTS)
 
     new_user = User(id=user_id, login=login, displayName=login)
     new_user.save()
 
-    return response.HttpResponse(status=200)
+    return response.HttpResponse()
 
 
 @require_http_methods(["GET"])
@@ -44,7 +49,7 @@ def get_user(request, user_id):
     try:
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
-        return response.HttpResponse(status=404)
+        return response.HttpResponse(*NO_USER)
     return response.JsonResponse({"id": user.id, "login": user.login, "displayName": user.displayName})
 
 
@@ -57,10 +62,10 @@ def update_user(request: HttpRequest, user_id, **kwargs):
     except Http404:
         return response.HttpResponse(*NO_USER)
     if user.id != user_id:
-        return response.HttpResponse(status=400, reason="User id isnt equal to user connected id")
+        return response.HttpResponse(*BAD_IDS)
     if 'picture' in request.FILES.keys():
         if request.FILES['picture'].content_type != 'image/png':
-            return HttpResponse(status=400, reason="Only png images are allowed")
+            return HttpResponse(*ONLY_PNG)
         with open(f"{settings.PICTURES_DST}/{user_id}.png", "wb+") as f:
             for chunk in request.FILES["picture"]:
                 f.write(chunk)
@@ -85,12 +90,13 @@ def delete_user(request, user_id, **kwargs):
     except Http404:
         return response.HttpResponse(*NO_USER)
     if user.id != user_id:
-        return response.HttpResponse(status=400, reason="User id isnt equal to user connected id")
+        return response.HttpResponse(*BAD_IDS)
     try:
         delete_response = requests.delete(f"{settings.AUTH_SERVICE_URL}/{user_id}/delete", verify=False)
     except requests.exceptions.ConnectionError as e:
-        return response.HttpResponse(status=400, reason="Cant connect to auth-service")
+        return response.HttpResponse(*CANT_CONNECT_AUTH)
     if delete_response.status_code != 200:
         return response.HttpResponse(status=delete_response.status_code, reason=delete_response.text)
     user.delete()
     return response.HttpResponse()
+
