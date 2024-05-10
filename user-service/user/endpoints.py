@@ -112,3 +112,42 @@ def get_friends(request, user_id, **kwargs):
         return response.HttpResponse(*BAD_IDS)
     # get all the friends and return them
     return response.HttpResponse()
+
+@csrf_exempt
+@ourJWT.Decoder.check_auth()
+@require_http_methods(["GET"])
+def get_friend_rec(request, user_id, **kwargs):
+    try:
+        user = get_user_from_jwt(kwargs)
+    except Http404:
+        return response.HttpResponse(*NO_USER)
+    if user.id != user_id:
+        return response.HttpResponse(*BAD_IDS)
+    # get all the friends requests you received
+    return response.HttpResponse()
+
+@csrf_exempt
+@ourJWT.Decoder.check_auth()
+@require_http_methods(["GET"])
+def get_friend_send(request, user_id, **kwargs):
+    try:
+        user = get_user_from_jwt(kwargs)
+    except Http404:
+        return response.HttpResponse(*NO_USER)
+    if user.id != user_id:
+        return response.HttpResponse(*BAD_IDS)
+    # get all the friends requests you sent
+    return response.HttpResponse()
+
+@csrf_exempt
+@ourJWT.Decoder.check_auth()
+@require_http_methods(["GET"])
+def add_friend(request, user_id, friend_id, **kwargs):
+    try:
+        user = get_user_from_jwt(kwargs)
+    except Http404:
+        return response.HttpResponse(*NO_USER)
+    if user.id != user_id:
+        return response.HttpResponse(*BAD_IDS)
+    # add the relation user_id to friend_id
+    return response.HttpResponse()
