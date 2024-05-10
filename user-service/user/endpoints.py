@@ -10,8 +10,7 @@ import requests
 import ourJWT.OUR_exception
 
 from userService import settings
-from .utils import get_user_from_jwt
-from utils import get_user_from_jwt
+from user.utils import get_user_from_jwt
 
 NO_USER = 404, "No user found with given ID"
 JSON_DECODE_ERROR = 400, "JSON Decode Error"
