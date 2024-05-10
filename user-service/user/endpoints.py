@@ -10,7 +10,7 @@ import requests
 import ourJWT.OUR_exception
 
 from userService import settings
-from ..utils import get_user_from_jwt
+from .utils import get_user_from_jwt
 
 NO_USER = 404, "No user found with given ID"
 JSON_DECODE_ERROR = 400, "JSON Decode Error"
@@ -99,4 +99,3 @@ def delete_user(request, user_id, **kwargs):
         return response.HttpResponse(status=delete_response.status_code, reason=delete_response.text)
     user.delete()
     return response.HttpResponse()
-
