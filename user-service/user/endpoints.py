@@ -103,5 +103,5 @@ def delete_user(request, user_id, **kwargs):
 
 @csrf_exempt
 def test(request):
-    test = request.get(f"{settings.AUTH_SERVICE_URL}/delete", verify=False)
+    test = request.delete(f"{settings.AUTH_SERVICE_URL}/delete", verify=False)
     return test
