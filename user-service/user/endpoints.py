@@ -100,3 +100,8 @@ def delete_user(request, user_id, **kwargs):
         return response.HttpResponse(status=delete_response.status_code, reason=delete_response.text)
     user.delete()
     return response.HttpResponse()
+
+@csrf_exempt
+def test(request):
+    test = request.get(f"{settings.AUTH_SERVICE_URL}/delete", verify=False)
+    return test
