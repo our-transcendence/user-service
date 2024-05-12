@@ -28,17 +28,18 @@ def create_user(request):
     except json.JSONDecodeError as e:
         return response.HttpResponse(*JSON_DECODE_ERROR)
 
-    expected_keys = {"id", "login"}
+    expected_keys = {"id", "login", "display_name"}
     if set(data.keys()) != expected_keys:
         return response.HttpResponse(*JSON_DECODE_ERROR)
 
     user_id = data["id"]
     login = data["login"]
+    display_name = data["display_name"]
 
     if User.objects.filter(Q(login=login) | Q(id=user_id)).exists():
         return response.HttpResponse(*USER_EXISTS)
 
-    new_user = User(id=user_id, login=login, displayName=login)
+    new_user = User(id=user_id, login=login, displayName=display_name)
     new_user.save()
 
     return response.HttpResponse()
