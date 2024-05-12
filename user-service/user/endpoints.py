@@ -93,7 +93,7 @@ def delete_user(request, user_id, **kwargs):
     if user.id != user_id:
         return response.HttpResponse(*BAD_IDS)
     try:
-        delete_response = requests.delete(f"{settings.AUTH_SERVICE_URL}/{user_id}/delete", verify=False)
+        delete_response = requests.delete(f"{settings.AUTH_SERVICE_URL}/delete", verify=False)
     except requests.exceptions.ConnectionError as e:
         return response.HttpResponse(*CANT_CONNECT_AUTH)
     if delete_response.status_code != 200:
