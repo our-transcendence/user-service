@@ -1,3 +1,5 @@
+import os
+
 from django.db.models import Q
 from django.http import response, HttpRequest, HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
@@ -10,7 +12,7 @@ import requests
 import ourJWT.OUR_exception
 
 from userService import settings
-from ..utils import get_user_from_jwt
+from user.utils import get_user_from_jwt
 
 from django.db.models import Q
 from django.db.models import F
@@ -31,17 +33,18 @@ def create_user(request):
     except json.JSONDecodeError as e:
         return response.HttpResponse(*JSON_DECODE_ERROR)
 
-    expected_keys = {"id", "login"}
+    expected_keys = {"id", "login", "display_name"}
     if set(data.keys()) != expected_keys:
         return response.HttpResponse(*JSON_DECODE_ERROR)
 
     user_id = data["id"]
     login = data["login"]
+    display_name = data["display_name"]
 
     if User.objects.filter(Q(login=login) | Q(id=user_id)).exists():
         return response.HttpResponse(*USER_EXISTS)
 
-    new_user = User(id=user_id, login=login, displayName=login)
+    new_user = User(id=user_id, login=login, displayName=display_name)
     new_user.save()
 
     return response.HttpResponse()
@@ -95,13 +98,17 @@ def delete_user(request, user_id, **kwargs):
     if user.id != user_id:
         return response.HttpResponse(*BAD_IDS)
     try:
-        delete_response = requests.delete(f"{settings.AUTH_SERVICE_URL}/{user_id}/delete", verify=False)
+        delete_header = {"Authorization": os.getenv("USER_TO_AUTH_KEY")}
+        delete_response = requests.delete(f"{settings.AUTH_SERVICE_URL}/delete/{user_id}",
+                                          headers=delete_header,
+                                          verify=False)
     except requests.exceptions.ConnectionError as e:
         return response.HttpResponse(*CANT_CONNECT_AUTH)
     if delete_response.status_code != 200:
         return response.HttpResponse(status=delete_response.status_code, reason=delete_response.text)
     user.delete()
     return response.HttpResponse()
+<<<<<<< HEAD
 
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
@@ -158,3 +165,5 @@ def add_friend(request, user_id, friend_id, **kwargs):
         return response.HttpResponse(*BAD_IDS)
     # add the relation user_id to friend_id
     return response.HttpResponse()
+=======
+>>>>>>> main
