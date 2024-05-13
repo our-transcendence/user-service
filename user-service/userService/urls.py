@@ -25,8 +25,8 @@ urlpatterns = [
     path('<int:user_id>/update', endpoints.update_user),
     path('<int:user_id>/picture', endpoints.get_picture),
     path('<int:user_id>/delete', endpoints.delete_user),
-    path('<int:user_id>/friends', endpoints.get_friends),
-    path('<int:user_id>/friends_rec', endpoints.get_friend_rec),
-    path('<int:user_id>/friend_send', endpoints.get_friend_send),
-    path('<int:user_id>/add_friend/<int:friend_id>', endpoints.add_friend),
+    path('friends', endpoints.get_friends),
+    path('friends_rec', endpoints.get_friend_rec),
+    path('friend_send', endpoints.get_friend_send),
+    path('add_friend/<int:friend_id>', endpoints.add_friend),
 ]

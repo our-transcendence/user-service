@@ -2,7 +2,7 @@ from django.db.models import Q
 from django.http import response, HttpRequest, HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
-from user.models import User
+from user.models import User, Friend
 
 import json
 import requests
@@ -11,6 +11,9 @@ import ourJWT.OUR_exception
 
 from userService import settings
 from ..utils import get_user_from_jwt
+
+from django.db.models import Q
+from django.db.models import F
 
 NO_USER = 404, "No user found with given ID"
 JSON_DECODE_ERROR = 400, "JSON Decode Error"
@@ -103,14 +106,18 @@ def delete_user(request, user_id, **kwargs):
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
 @require_http_methods(["GET"])
-def get_friends(request, user_id, **kwargs):
+def get_friends(request, **kwargs):
     try:
         user = get_user_from_jwt(kwargs)
     except Http404:
         return response.HttpResponse(*NO_USER)
-    if user.id != user_id:
-        return response.HttpResponse(*BAD_IDS)
     # get all the friends and return them
+
+    Friend.objects.filter(
+        Q(user__friend__user=F('friend')) &
+        Q(friend__user__friend=F('user')) &
+        Q(user=user.id)
+    )
     return response.HttpResponse()
 
 @csrf_exempt
