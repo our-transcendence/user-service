@@ -95,19 +95,13 @@ def delete_user(request, user_id, **kwargs):
     if user.id != user_id:
         return response.HttpResponse(*BAD_IDS)
     try:
-        delete_response = requests.delete(f"{settings.AUTH_SERVICE_URL}/delete", verify=False)
+        delete_header = {"Authorization": os.getenv("USER_TO_AUTH_KEY")}
+        delete_response = requests.delete(f"{settings.AUTH_SERVICE_URL}/delete/{user_id}",
+                                          headers=delete_header,
+                                          verify=False)
     except requests.exceptions.ConnectionError as e:
         return response.HttpResponse(*CANT_CONNECT_AUTH)
     if delete_response.status_code != 200:
         return response.HttpResponse(status=delete_response.status_code, reason=delete_response.text)
     user.delete()
     return response.HttpResponse()
-
-@csrf_exempt
-def test(request):
-    print(os.getenv("USER_TO_AUTH_KEY"), flush=True)
-    request_header = {"Authorization": os.getenv("USER_TO_AUTH_KEY")}
-    test = requests.delete(f"{settings.AUTH_SERVICE_URL}/delete/1",
-                           headers=request_header,
-                           verify=False)
-    return HttpResponse()
