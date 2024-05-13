@@ -1,3 +1,5 @@
+import os
+
 from django.db.models import Q
 from django.http import response, HttpRequest, HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
@@ -103,5 +105,8 @@ def delete_user(request, user_id, **kwargs):
 
 @csrf_exempt
 def test(request):
-    test = requests.delete(f"{settings.AUTH_SERVICE_URL}/delete", verify=False)
+    request_header = {"Authorization": os.getenv("USER_TO_AUTH_KEY")}
+    test = requests.delete(f"{settings.AUTH_SERVICE_URL}/delete/1",
+                           headers=request_header,
+                           verify=False)
     return HttpResponse()
