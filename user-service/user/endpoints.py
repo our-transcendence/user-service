@@ -108,7 +108,6 @@ def delete_user(request, user_id, **kwargs):
         return response.HttpResponse(status=delete_response.status_code, reason=delete_response.text)
     user.delete()
     return response.HttpResponse()
-<<<<<<< HEAD
 
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
@@ -165,5 +164,3 @@ def add_friend(request, user_id, friend_id, **kwargs):
         return response.HttpResponse(*BAD_IDS)
     # add the relation user_id to friend_id
     return response.HttpResponse()
-=======
->>>>>>> main
