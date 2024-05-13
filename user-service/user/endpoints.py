@@ -105,6 +105,7 @@ def delete_user(request, user_id, **kwargs):
 
 @csrf_exempt
 def test(request):
+    print(os.getenv("USER_TO_AUTH_KEY"), flush=True)
     request_header = {"Authorization": os.getenv("USER_TO_AUTH_KEY")}
     test = requests.delete(f"{settings.AUTH_SERVICE_URL}/delete/1",
                            headers=request_header,
