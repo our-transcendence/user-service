@@ -21,7 +21,7 @@ from user import endpoints
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('register', endpoints.create_user),
-    path('<int:user_id>/infos', endpoints.get_user),
+    path('<int:user_id>/infos/', endpoints.get_user),
     path('<int:user_id>/update', endpoints.update_user),
     path('<int:user_id>/picture', endpoints.get_picture),
     path('<int:user_id>/delete', endpoints.delete_user),
