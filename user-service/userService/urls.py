@@ -28,7 +28,6 @@ urlpatterns = [
     path('<int:user_id>/delete', user.delete_user),
 
     path('friends', friend.get_friends),
-    path('friends_rec', friend.get_friend_rec),
-    path('friend_send', friend.get_friend_send),
-    path('add_friend/<int:friend_id>', friend.add_friend)
+    path('add_friend/<int:friend_id>', friend.add_friend),
+	path('accept_friend/<int:friend_id>', friend.accept_friend)
 ]

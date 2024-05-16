@@ -2,6 +2,7 @@ import uuid
 
 from django.db import models
 from django.core.validators import MinLengthValidator
+from django.forms import model_to_dict
 
 
 class User(models.Model):
@@ -13,10 +14,17 @@ class User(models.Model):
         null=True
     )
 
-class Friend(models.Model):
+class Friendship(models.Model):
     sender = models.ForeignKey(User, related_name='request_sender', on_delete=models.CASCADE)
     receiver = models.ForeignKey(User, related_name='request_receiver', on_delete=models.CASCADE)
     accepted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     class Meta:
         unique_together = (['sender', 'receiver'], ['receiver', 'sender'])
+
+    def to_dict(self):
+        return {
+            "Sender": model_to_dict(self.sender),
+            "receiver": model_to_dict(self.receiver),
+            "accepted": self.accepted
+            }

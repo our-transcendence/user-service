@@ -5,7 +5,7 @@ from django.core import serializers
 from django.http import response, HttpRequest, HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
-from user.models import User, Friend
+from user.models import User
 
 import json
 import requests
