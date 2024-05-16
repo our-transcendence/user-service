@@ -2,10 +2,11 @@ import uuid
 
 from django.db import models
 from django.core.validators import MinLengthValidator
+from django.forms import model_to_dict
 
 
 class User(models.Model):
-    id = models.BigIntegerField(primary_key=True)
+    id = models.BigIntegerField(primary_key=True, unique=True)
     login = models.CharField(max_length=15, unique=True)
     displayName = models.CharField(
         max_length=25,
@@ -13,9 +14,17 @@ class User(models.Model):
         null=True
     )
 
-class Friend(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    friend = models.ForeignKey(User, on_delete=models.CASCADE)
+class Friendship(models.Model):
+    sender = models.ForeignKey(User, related_name='request_sender', on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, related_name='request_receiver', on_delete=models.CASCADE)
+    accepted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     class Meta:
-        unique_together = ('user', 'friend')
+        unique_together = (['sender', 'receiver'], ['receiver', 'sender'])
+
+    def to_dict(self):
+        return {
+            "Sender": model_to_dict(self.sender),
+            "receiver": model_to_dict(self.receiver),
+            "accepted": self.accepted
+            }
