@@ -1,6 +1,7 @@
 import os
 
 from django.db.models import Q
+from django.core import serializers
 from django.http import response, HttpRequest, HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
@@ -108,7 +109,6 @@ def delete_user(request, user_id, **kwargs):
         return response.HttpResponse(status=delete_response.status_code, reason=delete_response.text)
     user.delete()
     return response.HttpResponse()
-<<<<<<< HEAD
 
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
@@ -120,38 +120,16 @@ def get_friends(request, **kwargs):
         return response.HttpResponse(*NO_USER)
     # get all the friends and return them
 
-    Friend.objects.filter(
-        Q(user__friend__user=F('friend')) &
-        Q(friend__user__friend=F('user')) &
-        Q(user=user.id)
-    )
-    return response.HttpResponse()
+    sent_friendlist = list(user.request_sender.all())
+    received_friendlist = list(user.request_receiver.filter(accepted=True))
 
-@csrf_exempt
-@ourJWT.Decoder.check_auth()
-@require_http_methods(["GET"])
-def get_friend_rec(request, user_id, **kwargs):
-    try:
-        user = get_user_from_jwt(kwargs)
-    except Http404:
-        return response.HttpResponse(*NO_USER)
-    if user.id != user_id:
-        return response.HttpResponse(*BAD_IDS)
-    # get all the friends requests you received
-    return response.HttpResponse()
+    data = {
+        serializers.serialize('json', sent_friendlist),
+        serializers.serialize('json', received_friendlist)
+    }
 
-@csrf_exempt
-@ourJWT.Decoder.check_auth()
-@require_http_methods(["GET"])
-def get_friend_send(request, user_id, **kwargs):
-    try:
-        user = get_user_from_jwt(kwargs)
-    except Http404:
-        return response.HttpResponse(*NO_USER)
-    if user.id != user_id:
-        return response.HttpResponse(*BAD_IDS)
-    # get all the friends requests you sent
-    return response.HttpResponse()
+    return response.JsonResponse(data)
+
 
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
@@ -165,5 +143,3 @@ def add_friend(request, user_id, friend_id, **kwargs):
         return response.HttpResponse(*BAD_IDS)
     # add the relation user_id to friend_id
     return response.HttpResponse()
-=======
->>>>>>> main
