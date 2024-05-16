@@ -57,6 +57,7 @@ CORS_ALLOW_ALL_ORIGINS = DEBUG
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -96,6 +97,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'userService.wsgi.application'
 
+ASGI_APPLICATION = 'messageService.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
