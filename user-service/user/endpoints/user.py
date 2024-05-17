@@ -4,6 +4,7 @@ from django.db.models import Q
 from django.db import OperationalError
 from django.core import serializers
 from django.http import response, HttpRequest, HttpResponse, Http404
+from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
 from user.models import User
@@ -21,7 +22,7 @@ from django.db.models import F
 NO_USER = 404, "No user found with given ID"
 JSON_DECODE_ERROR = 400, "JSON Decode Error"
 JSON_BAD_KEYS = 400, "JSON Bad Keys"
-USER_EXISTS = 401, "User with this login already exists"
+USER_EXISTS = 406, "User with this login already exists"
 BAD_IDS = 400, "User id is not equal with connected user id"
 CANT_CONNECT_AUTH = 408, "Cant connect to auth-service"
 ONLY_PNG = 400, "Only png images are allowed"
@@ -29,8 +30,11 @@ DB_FAILURE =  503, "Database Failure"
 
 @csrf_exempt  # TODO: Not use in production
 @require_POST
-# TODO: Require the inter-service key
 def create_user(request):
+    authorisation = request.headers.get("Authorization")
+    if authorisation is None or authorisation != os.getenv("USER_TO_AUTH_KEY"):
+        return response.HttpResponseForbidden()
+
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError as e:
@@ -48,8 +52,11 @@ def create_user(request):
         return response.HttpResponse(*USER_EXISTS)
 
     new_user = User(id=user_id, login=login, displayName=display_name)
-    new_user.save()
-
+    try:
+        new_user.save()
+    except OperationalError as e:
+        print(f"DATABASE FAILURE {e}", flush=True)
+        return response.HttpResponse(*DB_FAILURE)
     return response.HttpResponse()
 
 
@@ -91,7 +98,11 @@ def update_user(request: HttpRequest, **kwargs):
 @csrf_exempt
 @require_http_methods(["GET"])
 def get_picture(request, user_id):
-    with open(f"{settings.PICTURES_DST}/{user_id}.png", "rb") as f:
+    try:
+        user = get_object_or_404(User, pk=user_id)
+    except Http404:
+        return response.HttpResponse(*NO_USER)
+    with open(f"{settings.PICTURES_DST}/{user.id}.png", "rb") as f:
         return HttpResponse(f.read(), content_type="image/png")
 
 @csrf_exempt
@@ -117,38 +128,4 @@ def delete_user(request, **kwargs):
     except OperationalError as e:
         print(f"DATABASE FAILURE {e}", flush=True)
         return response.HttpResponse(*DB_FAILURE)
-    return response.HttpResponse()
-
-@csrf_exempt
-@ourJWT.Decoder.check_auth()
-@require_http_methods(["GET"])
-def get_friends(request, **kwargs):
-    try:
-        user = get_user_from_jwt(kwargs)
-    except Http404:
-        return response.HttpResponse(*NO_USER)
-    # get all the friends and return them
-
-    sent_friendlist = list(user.request_sender.all())
-    received_friendlist = list(user.request_receiver.filter(accepted=True))
-
-    data = {
-        serializers.serialize('json', sent_friendlist),
-        serializers.serialize('json', received_friendlist)
-    }
-
-    return response.JsonResponse(data)
-
-
-@csrf_exempt
-@ourJWT.Decoder.check_auth()
-@require_http_methods(["GET"])
-def add_friend(request, user_id, friend_id, **kwargs):
-    try:
-        user = get_user_from_jwt(kwargs)
-    except Http404:
-        return response.HttpResponse(*NO_USER)
-    if user.id != user_id:
-        return response.HttpResponse(*BAD_IDS)
-    # add the relation user_id to friend_id
     return response.HttpResponse()
