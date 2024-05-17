@@ -97,23 +97,26 @@ def get_picture(request, user_id):
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
 @require_http_methods(["DELETE"])
-def delete_user(request, user_id, **kwargs):
+def delete_user(request, **kwargs):
     try:
-        user = get_user_from_jwt(kwargs)
+        user:User = get_user_from_jwt(kwargs)
     except Http404:
         return response.HttpResponse(*NO_USER)
-    if user.id != user_id:
-        return response.HttpResponse(*BAD_IDS)
+
     try:
         delete_header = {"Authorization": os.getenv("USER_TO_AUTH_KEY")}
-        delete_response = requests.delete(f"{settings.AUTH_SERVICE_URL}/delete/{user_id}",
+        delete_response = requests.delete(f"{settings.AUTH_SERVICE_URL}/delete/{user.id}",
                                           headers=delete_header,
                                           verify=False)
     except requests.exceptions.ConnectionError as e:
         return response.HttpResponse(*CANT_CONNECT_AUTH)
     if delete_response.status_code != 200:
         return response.HttpResponse(status=delete_response.status_code, reason=delete_response.text)
-    user.delete()
+    try:
+        user.delete()
+    except OperationalError as e:
+        print(f"DATABASE FAILURE {e}", flush=True)
+        return response.HttpResponse(*DB_FAILURE)
     return response.HttpResponse()
 
 @csrf_exempt
