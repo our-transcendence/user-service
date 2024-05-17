@@ -1,6 +1,7 @@
 import os
 
 from django.db.models import Q
+from django.db import OperationalError
 from django.core import serializers
 from django.http import response, HttpRequest, HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
@@ -15,7 +16,6 @@ import ourJWT.OUR_exception
 from userService import settings
 from user.utils import get_user_from_jwt
 
-from django.db.models import Q
 from django.db.models import F
 
 NO_USER = 404, "No user found with given ID"
@@ -25,6 +25,7 @@ USER_EXISTS = 401, "User with this login already exists"
 BAD_IDS = 400, "User id is not equal with connected user id"
 CANT_CONNECT_AUTH = 408, "Cant connect to auth-service"
 ONLY_PNG = 400, "Only png images are allowed"
+DB_FAILURE =  503, "Database Failure"
 
 @csrf_exempt  # TODO: Not use in production
 @require_POST
@@ -64,22 +65,26 @@ def get_user(request, user_id):
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
 @require_http_methods(["POST"])
-def update_user(request: HttpRequest, user_id, **kwargs):
+def update_user(request: HttpRequest, **kwargs):
     try:
         user = get_user_from_jwt(kwargs)
     except Http404:
         return response.HttpResponse(*NO_USER)
-    if user.id != user_id:
-        return response.HttpResponse(*BAD_IDS)
+
     if 'picture' in request.FILES.keys():
         if request.FILES['picture'].content_type != 'image/png':
             return HttpResponse(*ONLY_PNG)
-        with open(f"{settings.PICTURES_DST}/{user_id}.png", "wb+") as f:
+        with open(f"{settings.PICTURES_DST}/{user.id}.png", "wb+") as f:
             for chunk in request.FILES["picture"]:
                 f.write(chunk)
     if 'display_name' in request.POST.keys():
         user.displayName = request.POST['display_name']
-    user.save()
+    try:
+        user.save()
+    except OperationalError as e:
+        print(f"DATABASE FAILURE {e}", flush=True)
+        return response.HttpResponse(*DB_FAILURE)
+
     return response.HttpResponse()
 
 

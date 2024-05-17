@@ -23,7 +23,7 @@ urlpatterns = [
 
     path('register', user.create_user),
     path('<int:user_id>/infos', user.get_user),
-    path('<int:user_id>/update', user.update_user),
+    path('update', user.update_user),
     path('<int:user_id>/picture', user.get_picture),
     path('<int:user_id>/delete', user.delete_user),
 
