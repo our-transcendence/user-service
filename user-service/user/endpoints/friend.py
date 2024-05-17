@@ -28,6 +28,7 @@ BAD_IDS = 400, "User id is not equal with connected user id"
 CANT_CONNECT_AUTH = 408, "Cant connect to auth-service"
 ONLY_PNG = 400, "Only png images are allowed"
 ALREADY_FRIEND = 400, "Both user are already friend"
+NOT_FRIEND = 400, "No friendship beetwen both id"
 SAME_USER = 403, "Friend and user are the same"
 
 @csrf_exempt
@@ -89,6 +90,24 @@ def accept_friend(request, friend_id, **kwargs):
 
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
+@require_http_methods(["POST"])
+def refuse_friend(request, friend_id, **kwargs):
+    try:
+        user = get_user_from_jwt(kwargs)
+        friend = get_object_or_404(User, pk=friend_id)
+        friend_request = get_object_or_404(Friendship, sender=friend, receiver=user, accepted=False)
+    except Http404:
+        return response.HttpResponse(*NO_USER)
+
+    try:
+        friend_request.delete()
+    except OperationalError:
+        return response.HttpResponse(status=503, reason="Can't connect to Database")
+
+    return response.HttpResponse()
+
+@csrf_exempt
+@ourJWT.Decoder.check_auth()
 @require_http_methods(["GET"])
 def get_friends(request, **kwargs):
     try:
@@ -108,3 +127,21 @@ def get_friends(request, **kwargs):
     return response.JsonResponse(data=data)
 
 
+@csrf_exempt
+@ourJWT.Decoder.check_auth()
+@require_http_methods(["POST"])
+def delete_friend(request, friend_id, **kwargs):
+    try:
+        user = get_user_from_jwt(kwargs)
+        friend = get_object_or_404(User, pk=friend_id)
+    except Http404:
+        return response.HttpResponse(*NO_USER)
+
+    query= Friendship.objects.filter(
+        Q(sender=user, receiver=friend)|Q(sender=friend, receiver=user)
+    )
+
+    if not query.exists():
+        return response.HttpResponse(*NOT_FRIEND)
+    query.delete()
+    return response.HttpResponse()

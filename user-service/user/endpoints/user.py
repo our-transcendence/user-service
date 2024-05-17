@@ -28,6 +28,7 @@ ONLY_PNG = 400, "Only png images are allowed"
 
 @csrf_exempt  # TODO: Not use in production
 @require_POST
+# TODO: Require the inter-service key
 def create_user(request):
     try:
         data = json.loads(request.body)
