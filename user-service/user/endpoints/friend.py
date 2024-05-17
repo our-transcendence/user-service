@@ -153,5 +153,9 @@ def delete_friend(request, friend_id, **kwargs):
 
     if not query.exists():
         return response.HttpResponse(*NOT_FRIEND)
-    query.delete()
+    try:
+        query.delete()
+    except OperationalError as e:
+        print(f"DATABASE FAILURE {e}", flush=True)
+        return response.HttpResponse(*DB_FAILURE)
     return response.HttpResponse()
