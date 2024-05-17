@@ -30,6 +30,8 @@ ONLY_PNG = 400, "Only png images are allowed"
 ALREADY_FRIEND = 400, "Both user are already friend"
 NOT_FRIEND = 400, "No friendship beetwen both id"
 SAME_USER = 403, "Friend and user are the same"
+DB_FAILURE =  503, "Database Failure"
+ALREADY_ASKED = 409, "Friendship already asked"
 
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
@@ -43,13 +45,12 @@ def add_friend(request, friend_id, **kwargs):
 
     if user.id == friend.id:
         return response.HttpResponse(*SAME_USER)
+
     #regarder si user et friend sont deja amis
-    exist = Friendship.objects.filter(
+    if Friendship.objects.filter(
         Q(sender=user, receiver=friend, accepted=True) |
         Q(sender=friend, receiver=user, accepted=True)
-    ).exists()
-
-    if exist:
+    ).exists():
         return response.HttpResponse(*ALREADY_FRIEND)
 
     #regarder si friend a deja demande user en ami
@@ -60,14 +61,23 @@ def add_friend(request, friend_id, **kwargs):
     if asked == 1:
         try:
             validate_friendship()
-        except OperationalError:
-            return response.HttpResponse(status=503, reason="Can't connect to Database")
+        except OperationalError as e:
+            print(f"DATABASE FAILURE {e}", flush=True)
+            return response.HttpResponse(*DB_FAILURE)
         return response.HttpResponse()
-    if asked > 1:
-        return response.HttpResponse(500, "PLEASE CONTACT AN ADMIN WITH ERROR CODE 42-69 and your login")
+
+    #regarder si user a deja demande friend en ami
+    if Friendship.objects.filter(
+        Q(sender=user, receiver=friend, accepted=False)
+    ).exists():
+        return response.HttpResponse(*ALREADY_ASKED)
 
     new_request = Friendship(sender=user, receiver=friend)
-    new_request.save()
+    try:
+        new_request.save()
+    except OperationalError as e:
+        print(f"DATABASE FAILURE {e}", flush=True)
+        return response.HttpResponse(*DB_FAILURE)
     return response.HttpResponse()
 
 @csrf_exempt
