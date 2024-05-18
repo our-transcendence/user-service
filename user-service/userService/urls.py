@@ -16,17 +16,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from user import endpoints
+from user.endpoints import user, friend
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('register', endpoints.create_user),
-    path('<int:user_id>/infos/', endpoints.get_user),
-    path('<int:user_id>/update', endpoints.update_user),
-    path('<int:user_id>/picture', endpoints.get_picture),
-    path('<int:user_id>/delete', endpoints.delete_user),
-    path('friends', endpoints.get_friends),
-    path('friends_rec', endpoints.get_friend_rec),
-    path('friend_send', endpoints.get_friend_send),
-    path('add_friend/<int:friend_id>', endpoints.add_friend),
+
+    path('register/', user.create_user),
+    path('<int:user_id>/infos/', user.get_user),
+    path('update/', user.update_user),
+    path('<int:user_id>/picture/', user.get_picture),
+    path('delete/', user.delete_user),
+
+    path('friends/', friend.get_friends),
+    path('add_friend/<int:friend_id>/', friend.add_friend),
+	path('accept_friend/<int:friend_id>/', friend.accept_friend),
+	path('refuse_friend/<int:friend_id>/', friend.refuse_friend),
+	path('delete_friend/<int:friend_id>/', friend.delete_friend),
 ]
