@@ -28,11 +28,13 @@ CANT_CONNECT_AUTH = 408, "Cant connect to auth-service"
 ONLY_PNG = 400, "Only png images are allowed"
 DB_FAILURE =  503, "Database Failure"
 
+SERVICE_KEY = os.getenv("INTER_SERVICE_KEY")
+
 @csrf_exempt  # TODO: Not use in production
 @require_POST
 def create_user(request):
     authorisation = request.headers.get("Authorization")
-    if authorisation is None or authorisation != os.getenv("USER_TO_AUTH_KEY"):
+    if authorisation is None or authorisation != SERVICE_KEY:
         return response.HttpResponseForbidden()
 
     try:
@@ -115,7 +117,7 @@ def delete_user(request, **kwargs):
         return response.HttpResponse(*NO_USER)
 
     try:
-        delete_header = {"Authorization": os.getenv("USER_TO_AUTH_KEY")}
+        delete_header = {"Authorization": SERVICE_KEY}
         delete_response = requests.delete(f"{settings.AUTH_SERVICE_URL}/delete/{user.id}",
                                           headers=delete_header,
                                           verify=False)
