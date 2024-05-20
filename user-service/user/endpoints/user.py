@@ -59,6 +59,14 @@ def create_user(request):
     except OperationalError as e:
         print(f"DATABASE FAILURE {e}", flush=True)
         return response.HttpResponse(*DB_FAILURE)
+
+    # add default picture
+    try:
+        cat_request = requests.get("https://cataas.com/cat?type=square&position=center")
+    except requests.exceptions.ConnectionError as e:
+        return response.HttpResponse()
+    with open(f"{settings.PICTURES_DST}/{new_user.id}.png", "wb+") as f:
+        f.write(cat_request.content)
     return response.HttpResponse()
 
 
