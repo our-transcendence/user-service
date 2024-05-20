@@ -104,8 +104,11 @@ def get_picture(request, user_id):
         user = get_object_or_404(User, pk=user_id)
     except Http404:
         return response.HttpResponse(*NO_USER)
-    with open(f"{settings.PICTURES_DST}/{user.id}.png", "rb") as f:
-        return HttpResponse(f.read(), content_type="image/png")
+    try:
+        with open(f"{settings.PICTURES_DST}/{user.id}.png", "rb") as f:
+            return HttpResponse(f.read(), content_type="image/png")
+    except FileNotFoundError:
+        return response.HttpResponse(status=404, reason="No picture found")
 
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
