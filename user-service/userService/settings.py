@@ -152,7 +152,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-PICTURES_DST = "/home/beroux/goinfre/pictures"
+PICTURES_DST = "/app/public/profile_pic"
 
 pub_key_request = requests.get("https://auth-nginx:4444/public_key", verify=False)
 if pub_key_request.status_code != 200:
