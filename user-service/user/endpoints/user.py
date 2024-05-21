@@ -1,4 +1,7 @@
 import os
+import shutil
+import json
+import requests
 
 from django.db.models import Q
 from django.db import OperationalError
@@ -9,8 +12,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
 from user.models import User
 
-import json
-import requests
 
 import ourJWT.OUR_exception
 
@@ -61,12 +62,12 @@ def create_user(request):
         return response.HttpResponse(*DB_FAILURE)
 
     # add default picture
-    try:
-        cat_request = requests.get("https://cataas.com/cat?type=square&position=center")
-    except requests.exceptions.ConnectionError as e:
-        return response.HttpResponse()
-    with open(f"{settings.PICTURES_DST}/{new_user.id}.png", "wb+") as f:
-        f.write(cat_request.content)
+    # try:
+    #     cat_request = requests.get("https://cataas.com/cat?type=square&position=center")
+    #     with open(f"{settings.PICTURES_DST}/{new_user.id}.png", "wb+") as f:
+    #         f.write(cat_request.content)
+    # except requests.exceptions.ConnectionError as e:
+    shutil.copyfile("/data/default.png", f"{settings.PICTURES_DST}/{new_user.id}.png")
     return response.HttpResponse()
 
 
@@ -141,4 +142,6 @@ def delete_user(request, **kwargs):
     except OperationalError as e:
         print(f"DATABASE FAILURE {e}", flush=True)
         return response.HttpResponse(*DB_FAILURE)
+    if os.path.exists(f"{settings.PICTURES_DST}/{user.id}.png"):
+        os.remove(f"{settings.PICTURES_DST}/{user.id}.png")
     return response.HttpResponse()
