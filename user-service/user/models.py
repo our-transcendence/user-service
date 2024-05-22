@@ -12,6 +12,7 @@ class User(models.Model):
         validators=[MinLengthValidator(5, "Must contains at least 5 char")],
         null=True
     )
+    connected = models.BooleanField(default=False)
 
 class Friend(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
