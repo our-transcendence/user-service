@@ -26,6 +26,7 @@ JSON_BAD_KEYS = 400, "JSON Bad Keys"
 USER_EXISTS = 406, "User with this login already exists"
 BAD_IDS = 400, "User id is not equal with connected user id"
 CANT_CONNECT_AUTH = 408, "Cant connect to auth-service"
+CANT_CONNECT_STATS = 408, "Cant connect to stats-service"
 ONLY_PNG = 400, "Only png images are allowed"
 DB_FAILURE =  503, "Database Failure"
 
@@ -129,15 +130,28 @@ def delete_user(request, **kwargs):
     except Http404:
         return response.HttpResponse(*NO_USER)
 
+    #delete user from auth-service
     try:
         delete_header = {"Authorization": SERVICE_KEY}
-        delete_response = requests.delete(f"{settings.AUTH_SERVICE_URL}/delete/{user.id}",
+        auth_response = requests.delete(f"{settings.AUTH_SERVICE_URL}/delete/{user.id}",
                                           headers=delete_header,
                                           verify=False)
     except requests.exceptions.ConnectionError as e:
         return response.HttpResponse(*CANT_CONNECT_AUTH)
-    if delete_response.status_code != 200:
-        return response.HttpResponse(status=delete_response.status_code, reason=delete_response.text)
+    if auth_response.status_code != 200:
+        return response.HttpResponse(status=auth_response.status_code, reason=auth_response.text)
+
+    #delete user from stats service
+    try:
+        stats_response = requests.delete(f"{settings.STATS_SERVICE_URL}/stats/{user.id}/delete",
+                                          headers=delete_header,
+                                          verify=False)
+    except requests.exceptions.ConnectionError as e:
+        return response.HttpResponse(*CANT_CONNECT_STATS)
+    if stats_response.status_code != 200:
+        return response.HttpResponse(status=stats_response.status_code, reason=stats_response.text)
+
+
     try:
         user.delete()
     except OperationalError as e:

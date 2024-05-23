@@ -162,3 +162,5 @@ if pub_key_request.status_code != 200:
 ourJWT.Decoder.pub_key = pub_key_request.text
 
 AUTH_SERVICE_URL = "https://auth-nginx:4444"
+STATS_SERVICE_URL = "https://stats-nginx:5151"
+
