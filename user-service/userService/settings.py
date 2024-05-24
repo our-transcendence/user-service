@@ -34,10 +34,10 @@ ALLOWED_HOSTS = [
     'localhost',
     'auth-nginx',
     'user-nginx',
-    'chat-nginx',
     'history-nginx',
     'our-transcendence.games',
-        ]
+    'stats-nginx',
+]
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -163,4 +163,5 @@ ourJWT.Decoder.pub_key = pub_key_request.text
 
 AUTH_SERVICE_URL = "https://auth-nginx:4444"
 STATS_SERVICE_URL = "https://stats-nginx:5151"
+HISTORY_SERVICE_URL = "https://history-nginx:4343"
 
