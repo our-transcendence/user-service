@@ -123,8 +123,9 @@ def get_picture(request, user_id):
 
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
-@require_http_methods(["DELETE"])
+# @require_http_methods(["DELETE"])
 def delete_user(request, **kwargs):
+    print(request.method, flush=True)
     try:
         user:User = get_user_from_jwt(kwargs)
     except Http404:
