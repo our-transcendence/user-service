@@ -15,6 +15,11 @@ from pathlib import Path
 
 import ourJWT
 import requests
+import urllib3
+
+urllib3.disable_warnings()
+
+APPEND_SLASH = False
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
