@@ -151,6 +151,17 @@ def delete_user(request, **kwargs):
     if stats_response.status_code != 200:
         return response.HttpResponse(status=stats_response.status_code, reason=stats_response.text)
 
+    #delete user from history service
+    try:
+        delete_data = {"player_id": user.id}
+        history_response: requests.Response = requests.delete(f"{settings.HISTORY_SERVICE_URL}/playerdelete",
+                                          headers=delete_header,
+                                          data=json.dumps(delete_data),
+                                          verify=False)
+    except requests.exceptions.ConnectionError as e:
+        return response.HttpResponse(*CANT_CONNECT_STATS)
+    if history_response.status_code != 200:
+        return response.HttpResponse(status=history_response.status_code, reason=history_response.reason)
 
     try:
         user.delete()
