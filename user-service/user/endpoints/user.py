@@ -18,7 +18,6 @@ import ourJWT.OUR_exception
 from userService import settings
 from user.utils import get_user_from_jwt
 
-from django.db.models import F
 
 NO_USER = 404, "No user found with given ID"
 JSON_DECODE_ERROR = 400, "JSON Decode Error"
@@ -81,7 +80,7 @@ def get_user(request, user_id):
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
         return response.HttpResponse(*NO_USER)
-    return response.JsonResponse({"id": user.id, "login": user.login, "displayName": user.displayName})
+    return response.JsonResponse({"id": user.id, "login": user.login, "displayName": user.displayName, "connected": user.connected})
 
 
 @csrf_exempt
