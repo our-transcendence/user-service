@@ -67,7 +67,7 @@ def create_user(request):
         cat_request = requests.get("https://cataas.com/cat?type=square&position=center")
         with open(f"{settings.PICTURES_DST}/{new_user.id}.png", "wb+") as f:
             f.write(cat_request.content)
-    except requests.exceptions.ConnectionError as e:
+    except Exception as e:
         print(f"CAT FAILURE {e}", flush=True)
         shutil.copyfile("/data/default.png", f"{settings.PICTURES_DST}/{new_user.id}.png")
     return response.HttpResponse()
