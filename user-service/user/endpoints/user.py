@@ -65,12 +65,10 @@ def create_user(request):
     # add default picture
     try:
         cat_request = requests.get("https://cataas.com/cat?type=square&position=center")
-        if (cat_request.status_code / 100) % 10 == 2:
-            with open(f"{settings.PICTURES_DST}/{new_user.id}.png", "wb+") as f:
-                f.write(cat_request.content)
-        else:
-            print(f"CAT FAILURE {cat_request.reason}", flush=True)
-            shutil.copyfile("/data/default.png", f"{settings.PICTURES_DST}/{new_user.id}.png")
+        if (cat_request.status_code / 100) % 10 != 2:
+            raise Exception("Cataas request failed")
+        with open(f"{settings.PICTURES_DST}/{new_user.id}.png", "wb+") as f:
+            f.write(cat_request.content)
     except Exception as e:
         print(f"CAT FAILURE {e}", flush=True)
         shutil.copyfile("/data/default.png", f"{settings.PICTURES_DST}/{new_user.id}.png")
