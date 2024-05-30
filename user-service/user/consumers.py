@@ -3,7 +3,7 @@ from http.cookies import SimpleCookie
 from user.models import User
 from userService import settings
 import jwt
-import channels.generic.websocket import WebsocketConsumer
+from channels.generic.websocket import WebsocketConsumer
 
 class ChatConsumer(WebsocketConsumer):
 
