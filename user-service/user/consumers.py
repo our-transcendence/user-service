@@ -5,13 +5,14 @@ from userService import settings
 import jwt
 from channels.generic.websocket import WebsocketConsumer
 
-class ChatConsumer(WebsocketConsumer):
 
+class ChatConsumer(WebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.id = None
         self.display_name = None
         self.username = None
+
     async def connect(self):
         i = 0
         while i < len(self.scope['headers']) and self.scope['headers'][i][0].decode() != "cookie":
@@ -36,8 +37,8 @@ class ChatConsumer(WebsocketConsumer):
         self.accept()
 
         self.send(text_data=json.dumps({
-            'type':'connection_established',
-            'message':'you are now connected'
+            'type': 'connection_established',
+            'message': 'you are now connected'
         }))
         my_user = User.objets.get(self.id)
         my_user.connected = True
