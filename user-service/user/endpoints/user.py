@@ -84,6 +84,19 @@ def get_user(request, user_id):
     return response.JsonResponse({"id": user.id, "login": user.login, "displayName": user.displayName})
 
 
+@require_http_methods(["GET"])
+def get_language(request, user_id):
+    authorisation = request.headers.get("Authorization")
+    if authorisation is None or authorisation != SERVICE_KEY:
+        return response.HttpResponseForbidden()
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return response.HttpResponse(*NO_USER)
+    return response.HttpResponse(user.language)
+
+
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
 @require_http_methods(["POST"])

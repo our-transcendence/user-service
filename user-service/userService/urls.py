@@ -26,6 +26,7 @@ urlpatterns = [
     path('update/', user.update_user),
     path('<int:user_id>/picture/', user.get_picture),
     path('delete/', user.delete_user),
+	path('<int:user_id>/language/', user.get_language),
 
     path('friends/', friend.get_friends),
     path('add_friend/<int:friend_id>/', friend.add_friend),
