@@ -13,6 +13,7 @@ class User(models.Model):
         validators=[MinLengthValidator(5, "Must contains at least 5 char")],
         null=True
     )
+    language = models.CharField(max_length=2, default="en")
 
 class Friendship(models.Model):
     sender = models.ForeignKey(User, related_name='request_sender', on_delete=models.CASCADE)
