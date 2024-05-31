@@ -94,7 +94,7 @@ def get_language(request, user_id):
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
         return response.HttpResponse(*NO_USER)
-    return response.HttpResponse(user.language)
+    return response.JsonResponse({'language':user.language})
 
 
 @csrf_exempt
