@@ -92,6 +92,23 @@ def get_user(request, user_id):
         "status": status
     })
 
+@ourJWT.Decoder.check_auth
+@require_http_methods(["GET"])
+def search_user(request, **kwargs):
+    data: dict = json.loads(request.body)
+    to_search = data.get("display_name")
+    
+    if to_search is None:
+        return response.HttpResponseBadRequest()
+
+    search_result = User.objects.filter(displayName=to_search)
+
+    return_dic: dict
+    for item in search_result:
+        return_dic[item.id] = get_user(request, item.id)
+
+    return response.JsonResponse(return_dic)
+
 
 @csrf_exempt
 @ourJWT.Decoder.check_auth()

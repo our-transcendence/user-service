@@ -25,6 +25,7 @@ urlpatterns = [
     path('<int:user_id>/infos/', user.get_user),
     path('update/', user.update_user),
     path('<int:user_id>/picture/', user.get_picture),
+	path('search/', user.search_user),
     path('delete/', user.delete_user),
 
     path('friends/', friend.get_friends),
