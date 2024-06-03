@@ -3,10 +3,10 @@ from http.cookies import SimpleCookie
 from user.models import User
 from userService import settings
 import jwt
-from channels.generic.websocket import WebsocketConsumer
+from channels.generic.websocket import AsyncWebsocketConsumer
 
 
-class ChatConsumer(WebsocketConsumer):
+class ChatConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.id = None
@@ -34,17 +34,12 @@ class ChatConsumer(WebsocketConsumer):
                 self.id = token['id']
         await self.channel_layer.group_add(self.username, self.channel_name)
         await self.accept()
-        self.accept()
+        await self.accept()
 
-        self.send(text_data=json.dumps({
+        await self.send(text_data=json.dumps({
             'type': 'connection_established',
             'message': 'you are now connected'
         }))
-        my_user = User.objets.get(self.id)
-        my_user.connected = True
-        my_user.save()
 
     async def disconnect(self, code):
-        my_user = User.objets.get(self.id)
-        my_user.connected = False
-        my_user.save()
+        pass
