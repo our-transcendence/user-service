@@ -123,6 +123,13 @@ DATABASES = {
     }
 }
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": f"redis://{os.getenv('REDIS_USERNAME', 'user_redis_user')}:{os.getenv('REDIS_PASSWORD', 'user_redis_pass')}@redis:6379",
+    }
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
