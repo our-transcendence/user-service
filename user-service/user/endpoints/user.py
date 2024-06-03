@@ -103,9 +103,8 @@ def search_user(request, **kwargs):
 
     search_result = User.objects.filter(displayName=to_search)
 
-    return_dic: dict
+    return_dic: dict = dict()
     for item in search_result:
-        id = item.id
         return_dic[id] = get_user(request, item.id)
 
     return response.JsonResponse(return_dic)
