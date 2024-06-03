@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
 from user.models import User
+from django.core.cache import cache
 
 
 import ourJWT.OUR_exception
@@ -81,7 +82,15 @@ def get_user(request, user_id):
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
         return response.HttpResponse(*NO_USER)
-    return response.JsonResponse({"id": user.id, "login": user.login, "displayName": user.displayName, "connected": user.connected})
+    status = cache.get(user.id)
+    if status is None:
+        status = "disconnected"
+    return response.JsonResponse({
+        "id": user.id,
+        "login": user.login,
+        "displayName": user.displayName,
+        "connected": status
+    })
 
 
 @csrf_exempt

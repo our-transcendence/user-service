@@ -1,9 +1,9 @@
 import json
 from http.cookies import SimpleCookie
-from user.models import User
 from userService import settings
 import jwt
 from channels.generic.websocket import AsyncWebsocketConsumer
+from django.core.cache import cache
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -32,9 +32,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.username = token['login']
                 self.display_name = token['displayName']
                 self.id = token['id']
-        await self.channel_layer.group_add(self.username, self.channel_name)
+        # await self.channel_layer.group_add(self.username, self.channel_name)
         await self.accept()
-        await self.accept()
+        cache.set(self.id, "connected")
 
         await self.send(text_data=json.dumps({
             'type': 'connection_established',
@@ -42,4 +42,4 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
     async def disconnect(self, code):
-        pass
+        cache.set(self.id, "connected")
