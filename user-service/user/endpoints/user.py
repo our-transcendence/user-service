@@ -105,7 +105,7 @@ def search_user(request, **kwargs):
 
     search_result = User.objects.filter(displayName=to_search)
 
-    return_dic: dict = dict()
+    return_dic: dict = {}
     for user in search_result:
         return_dic[user.id] = model_to_dict(user)
         print(f'hello there: {return_dic}', flush=True)
