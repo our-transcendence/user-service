@@ -66,6 +66,7 @@ CORS_ALLOW_ALL_ORIGINS = DEBUG
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -107,6 +108,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'userService.wsgi.application'
 
+ASGI_APPLICATION = 'messageService.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
@@ -120,6 +122,15 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": f"redis://redis:6379",
+    }
+}
+
+print(CACHES, flush=True)
 
 
 # Password validation
@@ -167,7 +178,7 @@ pub_key_request = requests.get("https://auth-nginx:4444/public_key/", verify=Fal
 if pub_key_request.status_code != 200:
     raise Exception("Failed to get public key")
 ourJWT.Decoder.pub_key = pub_key_request.text
-
+PUB_KEY = pub_key_request.text
 AUTH_SERVICE_URL = "https://auth-nginx:4444"
 STATS_SERVICE_URL = "https://stats-nginx:5151"
 HISTORY_SERVICE_URL = "https://history-nginx:4343"

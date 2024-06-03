@@ -11,14 +11,14 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
 from user.models import User
-
+from django.core.cache import cache
 
 import ourJWT.OUR_exception
 
 from userService import settings
 from user.utils import get_user_from_jwt
 
-from django.db.models import F
+from django.db.models import Q
 
 NO_USER = 404, "No user found with given ID"
 JSON_DECODE_ERROR = 400, "JSON Decode Error"
@@ -28,9 +28,10 @@ BAD_IDS = 400, "User id is not equal with connected user id"
 CANT_CONNECT_AUTH = 408, "Cant connect to auth-service"
 CANT_CONNECT_STATS = 408, "Cant connect to stats-service"
 ONLY_PNG = 400, "Only png images are allowed"
-DB_FAILURE =  503, "Database Failure"
+DB_FAILURE = 503, "Database Failure"
 
 SERVICE_KEY = os.getenv("INTER_SERVICE_KEY")
+
 
 @csrf_exempt  # TODO: Not use in production
 @require_POST
@@ -81,7 +82,15 @@ def get_user(request, user_id):
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
         return response.HttpResponse(*NO_USER)
-    return response.JsonResponse({"id": user.id, "login": user.login, "displayName": user.displayName})
+    status = cache.get(user.id)
+    if status is None:
+        status = "disconnected"
+    return response.JsonResponse({
+        "id": user.id,
+        "login": user.login,
+        "displayName": user.displayName,
+        "status": status
+    })
 
 
 @csrf_exempt
@@ -123,13 +132,14 @@ def get_picture(request, user_id):
     except FileNotFoundError:
         return response.HttpResponse(status=404, reason="No picture found")
 
+
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
 @require_http_methods(["DELETE"])
 def delete_user(request, **kwargs):
     print(request.method, flush=True)
     try:
-        user:User = get_user_from_jwt(kwargs)
+        user: User = get_user_from_jwt(kwargs)
     except Http404:
         return response.HttpResponse(*NO_USER)
 
@@ -137,8 +147,8 @@ def delete_user(request, **kwargs):
     try:
         delete_header = {"Authorization": SERVICE_KEY}
         auth_response = requests.delete(f"{settings.AUTH_SERVICE_URL}/delete/{user.id}",
-                                          headers=delete_header,
-                                          verify=False)
+                                        headers=delete_header,
+                                        verify=False)
     except requests.exceptions.ConnectionError as e:
         return response.HttpResponse(*CANT_CONNECT_AUTH)
     if auth_response.status_code != 200:
@@ -147,8 +157,8 @@ def delete_user(request, **kwargs):
     #delete user from stats service
     try:
         stats_response = requests.delete(f"{settings.STATS_SERVICE_URL}/stats/{user.id}/delete",
-                                          headers=delete_header,
-                                          verify=False)
+                                         headers=delete_header,
+                                         verify=False)
     except requests.exceptions.ConnectionError as e:
         return response.HttpResponse(*CANT_CONNECT_STATS)
     if stats_response.status_code != 200:
@@ -158,9 +168,9 @@ def delete_user(request, **kwargs):
     try:
         delete_data = {"player_id": user.id}
         history_response: requests.Response = requests.delete(f"{settings.HISTORY_SERVICE_URL}/playerdelete",
-                                          headers=delete_header,
-                                          data=json.dumps(delete_data),
-                                          verify=False)
+                                                              headers=delete_header,
+                                                              data=json.dumps(delete_data),
+                                                              verify=False)
     except requests.exceptions.ConnectionError as e:
         return response.HttpResponse(*CANT_CONNECT_STATS)
     if history_response.status_code != 200:
