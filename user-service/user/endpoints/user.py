@@ -8,6 +8,8 @@ from django.db import OperationalError
 from django.core import serializers
 from django.http import response, HttpRequest, HttpResponse, Http404
 from django.shortcuts import get_object_or_404
+from django.core.validators import MinLengthValidator
+from django.forms.models import model_to_dict
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
 from user.models import User
@@ -104,8 +106,8 @@ def search_user(request, **kwargs):
     search_result = User.objects.filter(displayName=to_search)
 
     return_dic: dict = dict()
-    for item in search_result:
-        return_dic[id] = get_user(request, item.id)
+    for user in search_result:
+        return_dic[user.id] = model_to_dict(user)
         print(f'hello there: {return_dic}', flush=True)
     return response.JsonResponse(json.dumps(return_dic))
 

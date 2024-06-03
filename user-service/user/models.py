@@ -1,8 +1,7 @@
 import uuid
 
 from django.db import models
-from django.core.validators import MinLengthValidator
-from django.forms import model_to_dict
+
 
 
 class User(models.Model):
@@ -13,6 +12,7 @@ class User(models.Model):
         validators=[MinLengthValidator(5, "Must contains at least 5 char")],
         null=True
     )
+
 
 
 class Friendship(models.Model):
