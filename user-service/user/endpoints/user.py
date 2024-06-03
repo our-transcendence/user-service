@@ -92,8 +92,8 @@ def get_user(request, user_id):
         "status": status
     })
 
+@ourJWT.Decoder.check_auth()
 @require_http_methods(["GET"])
-@ourJWT.Decoder.check_auth
 def search_user(request, **kwargs):
     data: dict = json.loads(request.body)
     to_search = data.get("display_name")
