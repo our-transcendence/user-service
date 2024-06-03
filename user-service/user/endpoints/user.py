@@ -107,7 +107,7 @@ def search_user(request, **kwargs):
     for item in search_result:
         return_dic[id] = get_user(request, item.id)
 
-    return response.JsonResponse(json.dump(return_dic))
+    return response.JsonResponse(json.dumps(return_dic))
 
 
 @csrf_exempt
