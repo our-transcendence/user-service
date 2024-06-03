@@ -13,13 +13,14 @@ class User(models.Model):
         validators=[MinLengthValidator(5, "Must contains at least 5 char")],
         null=True
     )
-    connected = models.BooleanField(default=False)
+
 
 class Friendship(models.Model):
     sender = models.ForeignKey(User, related_name='request_sender', on_delete=models.CASCADE)
     receiver = models.ForeignKey(User, related_name='request_receiver', on_delete=models.CASCADE)
     accepted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+
     class Meta:
         unique_together = (['sender', 'receiver'], ['receiver', 'sender'])
 
@@ -28,4 +29,4 @@ class Friendship(models.Model):
             "Sender": model_to_dict(self.sender),
             "receiver": model_to_dict(self.receiver),
             "accepted": self.accepted
-            }
+        }

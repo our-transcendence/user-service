@@ -1,9 +1,9 @@
 import json
 from http.cookies import SimpleCookie
-from user.models import User
 from userService import settings
 import jwt
 from channels.generic.websocket import AsyncWebsocketConsumer
+from django.core.cache import cache
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
