@@ -109,7 +109,7 @@ def search_user(request, **kwargs):
     for user in search_result:
         return_dic[user.id] = model_to_dict(user)
         print(f'hello there: {return_dic}', flush=True)
-    return response.JsonResponse(json.dumps(return_dic))
+    return response.JsonResponse(return_dic)
 
 
 @csrf_exempt
