@@ -42,6 +42,7 @@ ALLOWED_HOSTS = [
     'history-nginx',
     'our-transcendence.games',
     'stats-nginx',
+    os.getenv("HOST", "127.0.0.1"),
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -52,6 +53,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://127.0.0.1:4443",
     "https://localhost:4443",
     'https://our-transcendence.games',
+    f"https://{os.getenv('HOST', '127.0.0.1')}:4443",
 ]
 
 CORS_ORIGIN_REGEX_WHITELIST = [
