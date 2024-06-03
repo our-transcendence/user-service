@@ -42,4 +42,4 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
     async def disconnect(self, code):
-        cache.set(self.id, "connected")
+        cache.set(self.id, "disconnected")
