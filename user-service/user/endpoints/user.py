@@ -21,6 +21,7 @@ from userService import settings
 from user.utils import get_user_from_jwt
 
 from django.db.models import Q
+from json import JSONDecodeError
 
 NO_USER = 404, "No user found with given ID"
 JSON_DECODE_ERROR = 400, "JSON Decode Error"
@@ -97,9 +98,12 @@ def get_user(request, user_id):
 @ourJWT.Decoder.check_auth()
 @require_http_methods(["GET"])
 def search_user(request, **kwargs):
-    data: dict = json.loads(request.body)
-    to_search = data.get("display_name")
+    try:
+        data: dict = json.loads(request.body)
+    except JSONDecodeError:
+        return response.HttpResponseBadRequest()
 
+    to_search = data.get("display_name")
     if to_search is None:
         return response.HttpResponseBadRequest()
 
