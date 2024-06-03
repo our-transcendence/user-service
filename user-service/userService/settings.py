@@ -127,6 +127,7 @@ CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
         "LOCATION": f"redis://{os.getenv('REDIS_PASSWORD', 'user_redis_pass')}@redis:6379",
+        "hosts": [f"redis://{os.getenv('REDIS_PASSWORD', 'user_redis_pass')}@redis:6379"]
     }
 }
 
