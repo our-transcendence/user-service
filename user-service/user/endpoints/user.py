@@ -105,7 +105,8 @@ def search_user(request, **kwargs):
 
     return_dic: dict
     for item in search_result:
-        return_dic[item.id] = get_user(request, item.id)
+        id = item.id
+        return_dic[id] = get_user(request, item.id)
 
     return response.JsonResponse(return_dic)
 
