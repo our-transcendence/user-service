@@ -128,7 +128,9 @@ def get_picture(request, user_id):
         return response.HttpResponse(*NO_USER)
     try:
         with open(f"{settings.PICTURES_DST}/{user.id}.png", "rb") as f:
-            return HttpResponse(f.read(), content_type="image/png")
+            pictureResponse = HttpResponse(f.read(), content_type="image/png")
+            pictureResponse['Cache-Control'] = 'no-store'
+            return pictureResponse
     except FileNotFoundError:
         return response.HttpResponse(status=404, reason="No picture found")
 
