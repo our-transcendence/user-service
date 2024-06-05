@@ -31,8 +31,9 @@ ONLY_PNG = 400, "Only png images are allowed"
 ALREADY_FRIEND = 400, "Both user are already friend"
 NOT_FRIEND = 400, "No friendship beetwen both id"
 SAME_USER = 403, "Friend and user are the same"
-DB_FAILURE =  503, "Database Failure"
+DB_FAILURE = 503, "Database Failure"
 ALREADY_ASKED = 409, "Friendship already asked"
+
 
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
@@ -49,8 +50,8 @@ def add_friend(request, friend_id, **kwargs):
 
     #regarder si user et friend sont deja amis
     if Friendship.objects.filter(
-        Q(sender=user, receiver=friend, accepted=True) |
-        Q(sender=friend, receiver=user, accepted=True)
+            Q(sender=user, receiver=friend, accepted=True) |
+            Q(sender=friend, receiver=user, accepted=True)
     ).exists():
         return response.HttpResponse(*ALREADY_FRIEND)
 
@@ -70,7 +71,7 @@ def add_friend(request, friend_id, **kwargs):
 
     #regarder si user a deja demande friend en ami
     if Friendship.objects.filter(
-        Q(sender=user, receiver=friend, accepted=False)
+            Q(sender=user, receiver=friend, accepted=False)
     ).exists():
         return response.HttpResponse(*ALREADY_ASKED)
 
@@ -81,6 +82,7 @@ def add_friend(request, friend_id, **kwargs):
         print(f"DATABASE FAILURE {e}", flush=True)
         return response.HttpResponse(*DB_FAILURE)
     return response.HttpResponse()
+
 
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
@@ -100,6 +102,7 @@ def accept_friend(request, friend_id, **kwargs):
 
     return response.HttpResponse()
 
+
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
 @require_http_methods(["POST"])
@@ -117,6 +120,7 @@ def refuse_friend(request, friend_id, **kwargs):
         return response.HttpResponse(status=503, reason="Can't connect to Database")
 
     return response.HttpResponse()
+
 
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
@@ -136,6 +140,26 @@ def get_friends(request, **kwargs):
         return response.HttpResponse(reason="User has no friend, that's sad")
     data = {friend.pk : model_to_dict(friend) for friend in q1}
 
+    return response.JsonResponse(data=data)
+
+
+@csrf_exempt
+@ourJWT.Decoder.check_auth()
+@require_http_methods(["GET"])
+def get_waiting_friends(request, **kwargs):
+    try:
+        user = get_user_from_jwt(kwargs)
+    except Http404:
+        return response.HttpResponse(*NO_USER)
+    # get all the waiting friends and return them
+
+    q1 = Friendship.objects.filter(
+        receiver=user, accepted=False
+    )
+
+    if not q1.exists():
+        return response.HttpResponse(200, "User has no waiting friend, that's sad")
+    data = {friend.pk: friend.to_dict() for friend in q1}
     return response.JsonResponse(data=data)
 
 
@@ -168,8 +192,8 @@ def delete_friend(request, friend_id, **kwargs):
     except Http404:
         return response.HttpResponse(*NO_USER)
 
-    query= Friendship.objects.filter(
-        Q(sender=user, receiver=friend)|Q(sender=friend, receiver=user)
+    query = Friendship.objects.filter(
+        Q(sender=user, receiver=friend) | Q(sender=friend, receiver=user)
     )
 
     if not query.exists():
