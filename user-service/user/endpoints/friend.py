@@ -55,13 +55,14 @@ def add_friend(request, friend_id, **kwargs):
         return response.HttpResponse(*ALREADY_FRIEND)
 
     #regarder si friend a deja demande user en ami
-    asked = Friendship.objects.filter(
+    query = Friendship.objects.filter(
         Q(sender=friend, receiver=user, accepted=False)
-    ).count()
+    )
+    asked = query.count()
 
     if asked == 1:
         try:
-            validate_friendship()
+            validate_friendship(query[0])
         except OperationalError as e:
             print(f"DATABASE FAILURE {e}", flush=True)
             return response.HttpResponse(*DB_FAILURE)
@@ -146,7 +147,7 @@ def get_requests(request, **kwargs):
         user = get_user_from_jwt(kwargs)
     except Http404:
         return response.HttpResponse(*NO_USER)
-    
+
     query= Friendship.objects.filter(
         Q(receiver=user, accepted=False)
     )
