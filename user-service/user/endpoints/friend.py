@@ -109,7 +109,7 @@ def refuse_friend(request, friend_id, **kwargs):
         friend = get_object_or_404(User, pk=friend_id)
         friend_request = get_object_or_404(Friendship, sender=friend, receiver=user, accepted=False)
     except Http404:
-        return response.HttpResponse(*NO_USER)
+        return response.HttpResponseNotFound()
 
     try:
         friend_request.delete()
@@ -160,7 +160,7 @@ def get_requests(request, **kwargs):
 
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
-@require_http_methods(["POST"])
+@require_http_methods(["DELETE"])
 def delete_friend(request, friend_id, **kwargs):
     try:
         user = get_user_from_jwt(kwargs)
