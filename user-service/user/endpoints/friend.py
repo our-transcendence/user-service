@@ -139,6 +139,24 @@ def get_friends(request, **kwargs):
 
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
+def get_requests(request, **kwargs):
+    try:
+        user = get_user_from_jwt(kwargs)
+    except Http404:
+        return response.HttpResponse(*NO_USER)
+    
+    query= Friendship.objects.filter(
+        Q(receiver=user, accepted=False)
+    )
+
+    data = {friend.pk : friend.to_dict() for friend in query}
+
+    return response.JsonResponse(data=data)
+
+
+
+@csrf_exempt
+@ourJWT.Decoder.check_auth()
 @require_http_methods(["POST"])
 def delete_friend(request, friend_id, **kwargs):
     try:
