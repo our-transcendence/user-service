@@ -4,6 +4,7 @@ from django.db import OperationalError
 from django.db.models import Q
 from django.core import serializers
 from django.shortcuts import get_object_or_404
+from django.forms.models import model_to_dict
 from django.http import response, HttpRequest, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
@@ -131,8 +132,8 @@ def get_friends(request, **kwargs):
     )
 
     if not q1.exists():
-        return response.HttpResponse(200, "User has no friend, that's sad")
-    data = {friend.pk : friend.to_dict() for friend in q1}
+        return response.HttpResponse(reason="User has no friend, that's sad")
+    data = {friend.pk : model_to_dict(friend) for friend in q1}
 
     return response.JsonResponse(data=data)
 
@@ -150,7 +151,7 @@ def get_requests(request, **kwargs):
         Q(receiver=user, accepted=False)
     )
 
-    data = {friend.pk : friend.to_dict() for friend in query}
+    data = {friend.pk : model_to_dict(friend) for friend in query}
 
     return response.JsonResponse(data=data)
 
