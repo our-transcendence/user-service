@@ -98,12 +98,7 @@ def get_user(request, user_id):
 @ourJWT.Decoder.check_auth()
 @require_http_methods(["GET"])
 def search_user(request, **kwargs):
-    try:
-        data: dict = json.loads(request.body)
-    except JSONDecodeError:
-        return response.HttpResponseBadRequest()
-
-    to_search = data.get("display_name")
+    to_search = request.GET.get("search_for")
     if to_search is None:
         return response.HttpResponseBadRequest()
 
