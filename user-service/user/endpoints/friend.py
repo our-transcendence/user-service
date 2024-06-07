@@ -139,6 +139,7 @@ def get_friends(request, **kwargs):
 
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
+@require_http_methods(["GET"])
 def get_requests(request, **kwargs):
     try:
         user = get_user_from_jwt(kwargs)
