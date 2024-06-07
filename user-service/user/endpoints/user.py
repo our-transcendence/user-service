@@ -102,6 +102,7 @@ def search_user(request, **kwargs):
     if to_search is None:
         return response.HttpResponseBadRequest()
 
+    print(f'searhcing for : {to_search}', flush=True)
     search_result = User.objects.filter(displayName=to_search)
 
     # return_dic: dict = {}
