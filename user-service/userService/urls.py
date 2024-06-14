@@ -25,12 +25,13 @@ urlpatterns = [
     path('<int:user_id>/infos/', user.get_user),
     path('update/', user.update_user),
     path('<int:user_id>/picture/', user.get_picture),
+    path('search/', user.search_user),
     path('delete/', user.delete_user),
 
     path('friends/', friend.get_friends),
     path('waiting_friends/', friend.get_waiting_friends),
     path('add_friend/<int:friend_id>/', friend.add_friend),
-    path('accept_friend/<int:friend_id>/', friend.accept_friend),
+    path('get_requests/', friend.get_requests), path('accept_friend/<int:friend_id>/', friend.accept_friend),
     path('refuse_friend/<int:friend_id>/', friend.refuse_friend),
     path('delete_friend/<int:friend_id>/', friend.delete_friend),
 ]

@@ -4,6 +4,7 @@ from django.db import OperationalError
 from django.db.models import Q
 from django.core import serializers
 from django.shortcuts import get_object_or_404
+from django.forms.models import model_to_dict
 from django.http import response, HttpRequest, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
@@ -55,13 +56,14 @@ def add_friend(request, friend_id, **kwargs):
         return response.HttpResponse(*ALREADY_FRIEND)
 
     #regarder si friend a deja demande user en ami
-    asked = Friendship.objects.filter(
+    query = Friendship.objects.filter(
         Q(sender=friend, receiver=user, accepted=False)
-    ).count()
+    )
+    asked = query.count()
 
     if asked == 1:
         try:
-            validate_friendship()
+            validate_friendship(query[0])
         except OperationalError as e:
             print(f"DATABASE FAILURE {e}", flush=True)
             return response.HttpResponse(*DB_FAILURE)
@@ -110,7 +112,7 @@ def refuse_friend(request, friend_id, **kwargs):
         friend = get_object_or_404(User, pk=friend_id)
         friend_request = get_object_or_404(Friendship, sender=friend, receiver=user, accepted=False)
     except Http404:
-        return response.HttpResponse(*NO_USER)
+        return response.HttpResponseNotFound()
 
     try:
         friend_request.delete()
@@ -135,8 +137,8 @@ def get_friends(request, **kwargs):
     )
 
     if not q1.exists():
-        return response.HttpResponse(200, "User has no friend, that's sad")
-    data = {friend.pk: friend.to_dict() for friend in q1}
+        return response.HttpResponse(reason="User has no friend, that's sad")
+    data = {friend.pk: model_to_dict(friend) for friend in q1}
 
     return response.JsonResponse(data=data)
 
@@ -163,7 +165,26 @@ def get_waiting_friends(request, **kwargs):
 
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
-@require_http_methods(["POST"])
+@require_http_methods(["GET"])
+def get_requests(request, **kwargs):
+    try:
+        user = get_user_from_jwt(kwargs)
+    except Http404:
+        return response.HttpResponse(*NO_USER)
+
+    query= Friendship.objects.filter(
+        Q(receiver=user, accepted=False)
+    )
+
+    data = {friend.pk : model_to_dict(friend) for friend in query}
+
+    return response.JsonResponse(data=data)
+
+
+
+@csrf_exempt
+@ourJWT.Decoder.check_auth()
+@require_http_methods(["DELETE"])
 def delete_friend(request, friend_id, **kwargs):
     try:
         user = get_user_from_jwt(kwargs)
