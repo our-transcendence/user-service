@@ -18,7 +18,7 @@ from django.core.cache import cache
 import ourJWT.OUR_exception
 
 from userService import settings
-from user.utils import get_user_from_jwt
+from user.utils import get_user_from_jwt, update_DN_in_service
 
 from django.db.models import Q
 from json import JSONDecodeError
@@ -133,6 +133,7 @@ def update_user(request: HttpRequest, **kwargs):
                 f.write(chunk)
     if 'display_name' in request.POST.keys():
         user.displayName = request.POST['display_name']
+        update_DN_in_service(request.POST['display_name'])
     try:
         user.save()
     except OperationalError as e:

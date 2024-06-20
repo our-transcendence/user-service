@@ -10,3 +10,11 @@ def get_user_from_jwt(kwargs):
 def validate_friendship(friendship):
     friendship.accepted = True
     friendship.save()
+
+def update_DN_in_service(new_DN: str):
+    # update in auth
+
+    # update in stats
+
+    # update in history
+    pass
