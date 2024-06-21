@@ -14,11 +14,13 @@ class StatusConsumer(AsyncWebsocketConsumer):
         self.username = None
 
     async def connect(self):
+        print("WS CONNNECT", flush=True)
         i = 0
         while i < len(self.scope['headers']) and self.scope['headers'][i][0].decode() != "cookie":
             i += 1
         if i >= len(self.scope['headers']):
             await self.close(reason="no cookies")
+            print("closed no cookies", flush=True)
             return
         cookies = SimpleCookie()
         cookies.load(self.scope['headers'][i][1].decode())
@@ -30,6 +32,7 @@ class StatusConsumer(AsyncWebsocketConsumer):
                 self.display_name = token['displayName']
                 self.id = token['id']
         await self.accept()
+        print("accepted", flush=True)
         cache.set(self.id, "connected")
 
     async def disconnect(self, code):
