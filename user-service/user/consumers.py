@@ -34,6 +34,10 @@ class StatusConsumer(AsyncWebsocketConsumer):
         await self.accept()
         print("accepted", flush=True)
         cache.set(self.id, "connected")
+        # SEND status de tous les amis de id
+        # send to tous les amis de id "id just connected"
 
     async def disconnect(self, code):
+
         cache.set(self.id, "disconnected")
+        # send message to all ami de id "id just disconnected"
