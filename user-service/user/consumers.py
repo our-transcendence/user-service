@@ -10,7 +10,7 @@ class StatusConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.id = None
-        self.display_name = None
+        # self.display_name = None
         self.username = None
 
     async def connect(self):
@@ -29,7 +29,7 @@ class StatusConsumer(AsyncWebsocketConsumer):
             if name == "auth_token":
                 token = jwt.decode(content.value, settings.PUB_KEY, algorithms=["RS256"], issuer="OUR_Transcendence")
                 self.username = token['login']
-                self.display_name = token['displayName']
+                # self.display_name = token['displayName']
                 self.id = token['id']
         await self.accept()
         print("accepted", flush=True)
