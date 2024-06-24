@@ -47,7 +47,7 @@ class StatusConsumer(AsyncWebsocketConsumer):
         print(self.username, flush=True)
         print(self.channel_name, flush=True)
         name: str = f"{self.id}_{self.username}"
-        print(name)
+        print(name, flush=True)
         await self.channel_layer.group_add(name, self.channel_name)
         friends_ids: list = await self.get_friends()
         if friends_ids:
