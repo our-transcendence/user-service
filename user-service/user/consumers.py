@@ -36,13 +36,12 @@ class StatusConsumer(AsyncWebsocketConsumer):
         for name, content in cookies.items():
             print(f"{name}: {content.value}", flush=True)
             if name == "user_id":
-                self.id = int(content.value)
-                self.channel_name = get_object_or_404(User, pk=self.id).login
+                pass
             if name == "auth_token":
                 token = jwt.decode(content.value, settings.PUB_KEY, algorithms=["RS256"], issuer="OUR_Transcendence")
                 self.username = token['login']
                 self.id = token['id']
-                self.channel_name = get_object_or_404(User, pk=self.id).login
+                self.channel_name = self.username
         await self.accept()
         print("accepted", flush=True)
 
