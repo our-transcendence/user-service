@@ -37,6 +37,9 @@ class StatusConsumer(AsyncWebsocketConsumer):
                 token = jwt.decode(content.value, settings.PUB_KEY, algorithms=["RS256"], issuer="OUR_Transcendence")
                 self.username = token['login']
                 self.id = token['id']
+        if self.id is None:
+            print("NONE", flush=True)
+            self.close(1002)
         await self.accept()
         print("accepted", flush=True)
 
