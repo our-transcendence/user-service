@@ -20,8 +20,8 @@ class User(models.Model):
     @staticmethod
     def get_friends_ids(user_id) -> list | None:
         try:
-            user = get_object_or_404(User, pk=user_id)
-        except (Http404, MultipleObjectsReturned) :
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
             return None
         q1 = Friendship.objects.filter(receiver=user, accepted=True)
         q2 = Friendship.objects.filter(sender=user, accepted=True)

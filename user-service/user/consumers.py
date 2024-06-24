@@ -75,6 +75,7 @@ class StatusConsumer(AsyncWebsocketConsumer):
                 for user_id in friends_ids:
                     await self.channel_layer.group_discard(str(user_id), self.channel_name)
             cache.set(self.id, current)
+            self.lock.release()
 
     async def status(self, event):
         print(event)
