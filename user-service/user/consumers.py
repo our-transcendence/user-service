@@ -35,8 +35,6 @@ class StatusConsumer(AsyncWebsocketConsumer):
         cookies.load(self.scope['headers'][i][1].decode())
         for name, content in cookies.items():
             print(f"{name}: {content.value}", flush=True)
-            if name == "user_id":
-                pass
             if name == "auth_token":
                 token = jwt.decode(content.value, settings.PUB_KEY, algorithms=["RS256"], issuer="OUR_Transcendence")
                 self.username = token['login']
