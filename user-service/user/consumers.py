@@ -16,9 +16,7 @@ class StatusConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.id = None
-        # self.display_name = None
         self.username = None
-        self.channel_name = None
         redis_client = cache._cache.get_client(None)
         self.lock = redis_lock.Lock(redis_client, str(self.id) + "_lock")
 
@@ -39,7 +37,6 @@ class StatusConsumer(AsyncWebsocketConsumer):
                 token = jwt.decode(content.value, settings.PUB_KEY, algorithms=["RS256"], issuer="OUR_Transcendence")
                 self.username = token['login']
                 self.id = token['id']
-                self.channel_name = self.username
         await self.accept()
         print("accepted", flush=True)
 
