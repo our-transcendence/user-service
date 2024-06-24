@@ -27,9 +27,9 @@ class User(models.Model):
         q2 = Friendship.objects.filter(sender=user, accepted=True)
         friends_ids = []
         for query in q1:
-            friends_ids.append(query.sender)
+            friends_ids.append(query.sender.id)
         for query in q2:
-            friends_ids.append(query.receiver)
+            friends_ids.append(query.receiver.id)
         return friends_ids
 
 
