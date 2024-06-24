@@ -47,6 +47,7 @@ class StatusConsumer(AsyncWebsocketConsumer):
         if friends_ids:
             for user_id in friends_ids:
                 await self.channel_layer.group_add(str(user_id), self.channel_name)
+        print("Try to lock", flush=True)
         if self.lock.acquire(blocking=True):
             current = cache.get(self.id)
             if current is None:
