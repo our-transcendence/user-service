@@ -78,7 +78,7 @@ class StatusConsumer(AsyncWebsocketConsumer):
             self.lock.release()
 
     async def status(self, event):
-        print(event)
+        print(event, flush=True)
 
     @database_sync_to_async
     def get_friends(self) -> list:
