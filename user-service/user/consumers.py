@@ -1,6 +1,8 @@
 import json
 from http.cookies import SimpleCookie
 
+from django.shortcuts import get_object_or_404
+
 from user.models import User
 from userService import settings
 import jwt
@@ -16,6 +18,7 @@ class StatusConsumer(AsyncWebsocketConsumer):
         self.id = None
         # self.display_name = None
         self.username = None
+        self.channel_name = None
         redis_client = cache._cache.get_client(None)
         self.lock = redis_lock.Lock(redis_client, str(self.id) + "_lock")
 
@@ -34,10 +37,10 @@ class StatusConsumer(AsyncWebsocketConsumer):
             print(f"{name}: {content.value}", flush=True)
             if name == "user_id":
                 self.id = int(content.value)
+                self.id = get_object_or_404(User, pk=self.id).login
             if name == "auth_token":
                 token = jwt.decode(content.value, settings.PUB_KEY, algorithms=["RS256"], issuer="OUR_Transcendence")
                 self.username = token['login']
-                # self.display_name = token['displayName']
                 self.id = token['id']
         await self.accept()
         print("accepted", flush=True)
