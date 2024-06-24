@@ -2,6 +2,7 @@ import uuid
 
 from django.db import models
 from django.core.validators import MinLengthValidator
+from django.db.models import Q
 from django.forms import model_to_dict
 
 
@@ -13,6 +14,21 @@ class User(models.Model):
         validators=[MinLengthValidator(5, "Must contains at least 5 char")],
         null=True
     )
+
+    @staticmethod
+    def get_friends_ids(user_id) -> list | None:
+        users = User.objects.filter(id=user_id)
+        if not users.exists():
+            return None
+        current_user = users[0]
+        q1 = Friendship.objects.filter(receiver=current_user, accepted=True)
+        q2 = Friendship.objects.filter(sender=current_user, accepted=True)
+        friends_ids = []
+        for query in q1:
+            friends_ids.append(query.sender)
+        for query in q2:
+            friends_ids.append(query.receiver)
+        return friends_ids
 
 
 class Friendship(models.Model):
