@@ -6,13 +6,13 @@ from django.shortcuts import get_object_or_404
 from user.models import User
 from userService import settings
 import jwt
-from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.core.cache import cache
 import redis_lock
 from channels.db import database_sync_to_async
 
 
-class StatusConsumer(AsyncWebsocketConsumer):
+class StatusConsumer(AsyncJsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.id = None
@@ -75,7 +75,7 @@ class StatusConsumer(AsyncWebsocketConsumer):
             if current == 0:
                 await self.channel_layer.group_send(str(self.id), {
                     "type": "status",
-                    "message": "disconnected",
+                    "status": "disconnected",
                     "from": self.id
                 })
                 await self.channel_layer.group_discard(str(self.id), self.channel_name)
@@ -87,6 +87,10 @@ class StatusConsumer(AsyncWebsocketConsumer):
 
     async def status(self, event):
         print(event, flush=True)
+        await self.send_json({
+            "status": event["status"],
+            "from": event["from"]
+        })
 
     @database_sync_to_async
     def get_friends(self) -> list:
