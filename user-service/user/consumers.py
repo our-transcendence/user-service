@@ -39,7 +39,7 @@ class StatusConsumer(AsyncWebsocketConsumer):
                 self.id = token['id']
         if self.id is None:
             print("NONE", flush=True)
-            self.close(1002)
+            await self.close(1002)
         await self.accept()
         print("accepted", flush=True)
         await self.channel_layer.group_add(str(self.id), self.channel_name)
@@ -69,7 +69,11 @@ class StatusConsumer(AsyncWebsocketConsumer):
             if current > 0:
                 current -= 1
             if current == 0:
-                await self.channel_layer.group_send(str(self.id), {"type": "status", "message": "disconnected"})
+                await self.channel_layer.group_send(str(self.id), {
+                    "type": "status",
+                    "message": "disconnected",
+                    "from": self.id
+                })
                 await self.channel_layer.group_discard(str(self.id), self.channel_name)
                 friends_ids: list = await self.get_friends()
                 for user_id in friends_ids:
