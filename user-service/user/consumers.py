@@ -11,6 +11,7 @@ from django.core.cache import cache
 import redis_lock
 from channels.db import database_sync_to_async
 import asyncio
+import time
 
 class StatusConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
@@ -66,7 +67,7 @@ class StatusConsumer(AsyncWebsocketConsumer):
             self.lock.release()
 
     async def disconnect(self, code):
-        asyncio.sleep(3)
+        time.sleep(2)
         if self.lock.acquire(blocking=True):
             current = cache.get(self.id)
             if current is None:
