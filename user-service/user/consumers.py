@@ -75,7 +75,7 @@ class StatusConsumer(AsyncJsonWebsocketConsumer):
             if current == 0:
                 await self.channel_layer.group_send(str(self.id), {
                     "type": "status",
-                    "status": "disconnected",
+                    "message": "disconnected",
                     "from": self.id
                 })
                 await self.channel_layer.group_discard(str(self.id), self.channel_name)
@@ -88,7 +88,7 @@ class StatusConsumer(AsyncJsonWebsocketConsumer):
     async def status(self, event):
         print(event, flush=True)
         await self.send_json({
-            "status": event["status"],
+            "status": event["message"],
             "from": event["from"]
         })
 
