@@ -6,13 +6,13 @@ from django.shortcuts import get_object_or_404
 from user.models import User
 from userService import settings
 import jwt
-from channels.generic.websocket import AsyncJsonWebsocketConsumer
+from channels.generic.websocket import AsyncWebsocketConsumer
 from django.core.cache import cache
 import redis_lock
 from channels.db import database_sync_to_async
 
 
-class StatusConsumer(AsyncJsonWebsocketConsumer):
+class StatusConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.id = None
@@ -87,10 +87,10 @@ class StatusConsumer(AsyncJsonWebsocketConsumer):
 
     async def status(self, event):
         print(event, flush=True)
-        await self.send_json({
+        await self.send(json.dumps({
             "status": event["message"],
             "from": event["from"]
-        })
+        }))
 
     @database_sync_to_async
     def get_friends(self) -> list:
