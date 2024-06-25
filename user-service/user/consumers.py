@@ -51,6 +51,7 @@ class StatusConsumer(AsyncWebsocketConsumer):
         if self.lock.acquire(blocking=True):
             print("Has locked", flush=True)
             current = cache.get(self.id)
+            print(f"value: {current}", flush=True)
             if current is None:
                 current = 0
             current = int(current)
