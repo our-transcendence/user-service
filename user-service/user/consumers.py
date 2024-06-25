@@ -55,7 +55,11 @@ class StatusConsumer(AsyncWebsocketConsumer):
                 current = 0
             current = int(current)
             if current == 0:
-                await self.channel_layer.group_send(str(self.id), {"type": "status", "message": "connected"})
+                await self.channel_layer.group_send(str(self.id), {
+                    "type": "status",
+                    "message": "connected",
+                    "from": self.id
+                })
             current += 1
             cache.set(self.id, current)
             self.lock.release()
