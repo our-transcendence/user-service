@@ -90,6 +90,8 @@ class StatusConsumer(AsyncWebsocketConsumer):
 
     async def status(self, event):
         print(event, flush=True)
+        if event["from"] == self.id:
+            pass
         await self.send(json.dumps({
             "status": event["message"],
             "from": event["from"]
