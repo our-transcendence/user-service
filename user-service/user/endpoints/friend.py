@@ -1,5 +1,7 @@
 import os
 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.db import OperationalError
 from django.db.models import Q
 from django.core import serializers
@@ -203,4 +205,13 @@ def delete_friend(request, friend_id, **kwargs):
     except OperationalError as e:
         print(f"DATABASE FAILURE {e}", flush=True)
         return response.HttpResponse(*DB_FAILURE)
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(str(friend.id), {
+        "type": "delete_friend",
+        "ids": [user.id, friend.id]
+    })
+    async_to_sync(channel_layer.group_send)(str(user.id), {
+        "type": "delete_friend",
+        "ids": [user.id, friend.id]
+    })
     return response.HttpResponse()

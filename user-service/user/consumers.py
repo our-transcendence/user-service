@@ -6,14 +6,15 @@ from django.shortcuts import get_object_or_404
 from user.models import User
 from userService import settings
 import jwt
-from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.core.cache import cache
 import redis_lock
 from channels.db import database_sync_to_async
 import asyncio
 import time
 
-class StatusConsumer(AsyncWebsocketConsumer):
+
+class FriendsConsumer(AsyncJsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.id = None
@@ -87,6 +88,36 @@ class StatusConsumer(AsyncWebsocketConsumer):
                     await self.channel_layer.group_discard(str(user_id), self.channel_name)
             cache.set(self.id, current)
             self.lock.release()
+
+    async def get_other_id(self, ids):
+        other_id = ids[0]
+        if other_id == self.id:
+            other_id = ids[1]
+        return other_id
+
+    async def add_friend(self, event):
+        if self.id not in event["ids"]:
+            return
+        print(event, flush=True)
+        print(event["ids"])
+        other_id = await self.get_other_id(event["ids"])
+        await self.channel_layer.group_add(str(other_id), self.channel_name)
+        await self.send_json({
+            "action": "add_friend",
+            "id": other_id
+        })
+
+    async def delete_friend(self, event):
+        if self.id not in event["ids"]:
+            return
+        print(event, flush=True)
+        print(event["ids"])
+        other_id = await self.get_other_id(event["ids"])
+        await self.channel_layer.group_discard(str(other_id), self.channel_name)
+        await self.send_json({
+            "action": "delete_friend",
+            "id": other_id
+        })
 
     async def status(self, event):
         print(event, flush=True)
