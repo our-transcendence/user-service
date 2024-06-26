@@ -49,9 +49,9 @@ class FriendsConsumer(AsyncJsonWebsocketConsumer):
         if friends_ids:
             for user_id in friends_ids:
                 await self.channel_layer.group_add(str(user_id), self.channel_name)
-        print("Try to lock", flush=True)
+        print("Try to lock in connect", flush=True)
         if self.lock.acquire(blocking=True):
-            print("Has locked", flush=True)
+            print("Has locked in connect", flush=True)
             current = cache.get(self.id)
             print(f"value: {current}", flush=True)
             if current is None:
@@ -66,10 +66,13 @@ class FriendsConsumer(AsyncJsonWebsocketConsumer):
             current += 1
             cache.set(self.id, current)
             self.lock.release()
+            print("Lock released  in connect", flush=True)
 
     async def disconnect(self, code):
         await asyncio.sleep(2)
+        print("trying to lock in disconnect", flush=True)
         if self.lock.acquire(blocking=True):
+            print("Has locked in disconnect", flush=True)
             current = cache.get(self.id)
             if current is None:
                 current = 0
@@ -88,6 +91,7 @@ class FriendsConsumer(AsyncJsonWebsocketConsumer):
                     await self.channel_layer.group_discard(str(user_id), self.channel_name)
             cache.set(self.id, current)
             self.lock.release()
+            print("Lock released in disconnect", flush=True)
 
     async def get_other_id(self, ids):
         other_id = ids[0]
