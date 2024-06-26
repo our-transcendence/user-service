@@ -67,7 +67,7 @@ class StatusConsumer(AsyncWebsocketConsumer):
             self.lock.release()
 
     async def disconnect(self, code):
-        time.sleep(2)
+        await asyncio.sleep(2)
         if self.lock.acquire(blocking=True):
             current = cache.get(self.id)
             if current is None:
