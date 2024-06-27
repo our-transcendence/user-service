@@ -21,18 +21,18 @@ from user.utils import get_user_from_jwt, validate_friendship
 from django.db.models import Q
 from django.db.models import F
 
-NO_USER = 404, "No user found with given ID"
-JSON_DECODE_ERROR = 400, "JSON Decode Error"
-JSON_BAD_KEYS = 400, "JSON Bad Keys"
-USER_EXISTS = 401, "User with this login already exists"
-BAD_IDS = 400, "User id is not equal with connected user id"
-CANT_CONNECT_AUTH = 408, "Cant connect to auth-service"
-ONLY_PNG = 400, "Only png images are allowed"
-ALREADY_FRIEND = 400, "Both user are already friend"
-NOT_FRIEND = 400, "No friendship beetwen both id"
-SAME_USER = 403, "Friend and user are the same"
-DB_FAILURE =  503, "Database Failure"
-ALREADY_ASKED = 409, "Friendship already asked"
+NO_USER = b'', None, 404, "No user found with given ID"
+JSON_DECODE_ERROR = b'', None, 400, "JSON Decode Error"
+JSON_BAD_KEYS = b'', None, 400, "JSON Bad Keys"
+USER_EXISTS = b'', None, 401, "User with this login already exists"
+BAD_IDS = b'', None, 400, "User id is not equal with connected user id"
+CANT_CONNECT_AUTH = b'', None, 408, "Cant connect to auth-service"
+ONLY_PNG = b'', None, 400, "Only png images are allowed"
+ALREADY_FRIEND = b'', None, 400, "Both user are already friend"
+NOT_FRIEND = b'', None, 400, "No friendship beetwen both id"
+SAME_USER = b'', None, 403, "Friend and user are the same"
+DB_FAILURE = b'', None,  503, "Database Failure"
+ALREADY_ASKED = b'', None, 409, "Friendship already asked"
 
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
