@@ -24,10 +24,3 @@ class Friendship(models.Model):
 
     class Meta:
         unique_together = (['sender', 'receiver'], ['receiver', 'sender'])
-
-    def to_dict(self):
-        return {
-            "Sender": model_to_dict(self.sender),
-            "receiver": model_to_dict(self.receiver),
-            "accepted": self.accepted
-        }
