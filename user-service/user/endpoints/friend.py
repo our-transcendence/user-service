@@ -33,9 +33,8 @@ ONLY_PNG = b'', None, 400, "Only png images are allowed"
 ALREADY_FRIEND = b'', None, 400, "Both user are already friend"
 NOT_FRIEND = b'', None, 400, "No friendship beetwen both id"
 SAME_USER = b'', None, 403, "Friend and user are the same"
-DB_FAILURE = b'', None, 503, "Database Failure"
+DB_FAILURE = b'', None,  503, "Database Failure"
 ALREADY_ASKED = b'', None, 409, "Friendship already asked"
-
 
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
