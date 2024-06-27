@@ -45,8 +45,8 @@ class FriendsConsumer(AsyncJsonWebsocketConsumer):
         await self.accept()
         print("accepted", flush=True)
         await self.channel_layer.group_add(str(self.id), self.channel_name)
-        friends_ids: list = await self.get_friends()
-        if friends_ids:
+        friends_ids: list[int] | None = await self.get_friends()
+        if friends_ids is not None:
             for user_id in friends_ids:
                 await self.channel_layer.group_add(str(user_id), self.channel_name)
         print("Try to lock in connect", flush=True)
@@ -133,5 +133,5 @@ class FriendsConsumer(AsyncJsonWebsocketConsumer):
         }))
 
     @database_sync_to_async
-    def get_friends(self) -> list:
+    def get_friends(self) -> list[int] | None:
         return User.get_friends_ids(self.id)

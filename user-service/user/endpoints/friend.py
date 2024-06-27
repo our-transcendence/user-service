@@ -24,17 +24,17 @@ from django.db.models import Q
 from django.db.models import F
 
 NO_USER = b'', None, 404, "No user found with given ID"
-JSON_DECODE_ERROR =  b'', None, 400, "JSON Decode Error"
-JSON_BAD_KEYS =  b'', None, 400, "JSON Bad Keys"
-USER_EXISTS =  b'', None, 401, "User with this login already exists"
-BAD_IDS =  b'', None, 400, "User id is not equal with connected user id"
-CANT_CONNECT_AUTH =  b'', None, 408, "Cant connect to auth-service"
-ONLY_PNG =  b'', None, 400, "Only png images are allowed"
-ALREADY_FRIEND =  b'', None, 400, "Both user are already friend"
-NOT_FRIEND =  b'', None, 400, "No friendship beetwen both id"
-SAME_USER =  b'', None, 403, "Friend and user are the same"
-DB_FAILURE =  b'', None, 503, "Database Failure"
-ALREADY_ASKED =  b'', None, 409, "Friendship already asked"
+JSON_DECODE_ERROR = b'', None, 400, "JSON Decode Error"
+JSON_BAD_KEYS = b'', None, 400, "JSON Bad Keys"
+USER_EXISTS = b'', None, 401, "User with this login already exists"
+BAD_IDS = b'', None, 400, "User id is not equal with connected user id"
+CANT_CONNECT_AUTH = b'', None, 408, "Cant connect to auth-service"
+ONLY_PNG = b'', None, 400, "Only png images are allowed"
+ALREADY_FRIEND = b'', None, 400, "Both user are already friend"
+NOT_FRIEND = b'', None, 400, "No friendship beetwen both id"
+SAME_USER = b'', None, 403, "Friend and user are the same"
+DB_FAILURE = b'', None, 503, "Database Failure"
+ALREADY_ASKED = b'', None, 409, "Friendship already asked"
 
 
 @csrf_exempt
@@ -140,7 +140,7 @@ def get_friends(request, **kwargs):
 
     if not q1.exists():
         return response.HttpResponse(reason="User has no friend, that's sad")
-    data = {friend.pk : model_to_dict(friend) for friend in q1}
+    data = {friend.pk: model_to_dict(friend) for friend in q1}
 
     return response.JsonResponse(data=data)
 
@@ -174,14 +174,13 @@ def get_requests(request, **kwargs):
     except Http404:
         return response.HttpResponse(*NO_USER)
 
-    query= Friendship.objects.filter(
+    query = Friendship.objects.filter(
         Q(receiver=user, accepted=False)
     )
 
-    data = {friend.pk : model_to_dict(friend) for friend in query}
+    data = {friend.pk: model_to_dict(friend) for friend in query}
 
     return response.JsonResponse(data=data)
-
 
 
 @csrf_exempt
@@ -207,10 +206,6 @@ def delete_friend(request, friend_id, **kwargs):
         return response.HttpResponse(*DB_FAILURE)
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(str(friend.id), {
-        "type": "delete_friend",
-        "ids": [user.id, friend.id]
-    })
-    async_to_sync(channel_layer.group_send)(str(user.id), {
         "type": "delete_friend",
         "ids": [user.id, friend.id]
     })

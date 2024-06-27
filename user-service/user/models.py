@@ -18,18 +18,20 @@ class User(models.Model):
     )
 
     @staticmethod
-    def get_friends_ids(user_id) -> list | None:
+    def get_friends_ids(user_id) -> list[int] | None:
         try:
             user = User.objects.get(pk=user_id)
         except User.DoesNotExist:
             return None
         q1 = Friendship.objects.filter(receiver=user, accepted=True)
         q2 = Friendship.objects.filter(sender=user, accepted=True)
-        friends_ids = []
+        friends_ids: list[int] = []
         for query in q1:
             friends_ids.append(query.sender.id)
         for query in q2:
             friends_ids.append(query.receiver.id)
+        if len(friends_ids) == 0:
+            return None
         return friends_ids
 
 
