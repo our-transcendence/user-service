@@ -23,15 +23,15 @@ from user.utils import get_user_from_jwt
 from django.db.models import Q
 from json import JSONDecodeError
 
-NO_USER = 404, "No user found with given ID"
-JSON_DECODE_ERROR = 400, "JSON Decode Error"
-JSON_BAD_KEYS = 400, "JSON Bad Keys"
-USER_EXISTS = 406, "User with this login already exists"
-BAD_IDS = 400, "User id is not equal with connected user id"
-CANT_CONNECT_AUTH = 408, "Cant connect to auth-service"
-CANT_CONNECT_STATS = 408, "Cant connect to stats-service"
-ONLY_PNG = 400, "Only png images are allowed"
-DB_FAILURE = 503, "Database Failure"
+NO_USER = b'', None, 404, "No user found with given ID"
+JSON_DECODE_ERROR = b'', None, 400, "JSON Decode Error"
+JSON_BAD_KEYS = b'', None, 400, "JSON Bad Keys"
+USER_EXISTS = b'', None, 406, "User with this login already exists"
+BAD_IDS = b'', None, 400, "User id is not equal with connected user id"
+CANT_CONNECT_AUTH = b'', None, 408, "Cant connect to auth-service"
+CANT_CONNECT_STATS = b'', None, 408, "Cant connect to stats-service"
+ONLY_PNG = b'', None, 400, "Only png images are allowed"
+DB_FAILURE = b'', None, 503, "Database Failure"
 
 SERVICE_KEY = os.getenv("INTER_SERVICE_KEY")
 
