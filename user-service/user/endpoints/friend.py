@@ -1,5 +1,7 @@
 import os
 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.db import OperationalError
 from django.db.models import Q
 from django.core import serializers
@@ -49,8 +51,8 @@ def add_friend(request, friend_id, **kwargs):
 
     #regarder si user et friend sont deja amis
     if Friendship.objects.filter(
-        Q(sender=user, receiver=friend, accepted=True) |
-        Q(sender=friend, receiver=user, accepted=True)
+            Q(sender=user, receiver=friend, accepted=True) |
+            Q(sender=friend, receiver=user, accepted=True)
     ).exists():
         return response.HttpResponse(*ALREADY_FRIEND)
 
@@ -70,7 +72,7 @@ def add_friend(request, friend_id, **kwargs):
 
     #regarder si user a deja demande friend en ami
     if Friendship.objects.filter(
-        Q(sender=user, receiver=friend, accepted=False)
+            Q(sender=user, receiver=friend, accepted=False)
     ).exists():
         return response.HttpResponse(*ALREADY_ASKED)
 
@@ -81,6 +83,7 @@ def add_friend(request, friend_id, **kwargs):
         print(f"DATABASE FAILURE {e}", flush=True)
         return response.HttpResponse(*DB_FAILURE)
     return response.HttpResponse()
+
 
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
@@ -100,6 +103,7 @@ def accept_friend(request, friend_id, **kwargs):
 
     return response.HttpResponse()
 
+
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
 @require_http_methods(["POST"])
@@ -118,6 +122,7 @@ def refuse_friend(request, friend_id, **kwargs):
 
     return response.HttpResponse()
 
+
 @csrf_exempt
 @ourJWT.Decoder.check_auth()
 @require_http_methods(["GET"])
@@ -134,8 +139,28 @@ def get_friends(request, **kwargs):
 
     if not q1.exists():
         return response.HttpResponse(reason="User has no friend, that's sad")
-    data = {friend.pk : model_to_dict(friend) for friend in q1}
+    data = {friend.pk: model_to_dict(friend) for friend in q1}
 
+    return response.JsonResponse(data=data)
+
+
+@csrf_exempt
+@ourJWT.Decoder.check_auth()
+@require_http_methods(["GET"])
+def get_waiting_friends(request, **kwargs):
+    try:
+        user = get_user_from_jwt(kwargs)
+    except Http404:
+        return response.HttpResponse(*NO_USER)
+    # get all the waiting friends and return them
+
+    q1 = Friendship.objects.filter(
+        receiver=user, accepted=False
+    )
+
+    if not q1.exists():
+        return response.HttpResponse(200, "User has no waiting friend, that's sad")
+    data = {friend.pk: friend.to_dict() for friend in q1}
     return response.JsonResponse(data=data)
 
 
@@ -148,14 +173,13 @@ def get_requests(request, **kwargs):
     except Http404:
         return response.HttpResponse(*NO_USER)
 
-    query= Friendship.objects.filter(
+    query = Friendship.objects.filter(
         Q(receiver=user, accepted=False)
     )
 
-    data = {friend.pk : model_to_dict(friend) for friend in query}
+    data = {friend.pk: model_to_dict(friend) for friend in query}
 
     return response.JsonResponse(data=data)
-
 
 
 @csrf_exempt
@@ -168,8 +192,8 @@ def delete_friend(request, friend_id, **kwargs):
     except Http404:
         return response.HttpResponse(*NO_USER)
 
-    query= Friendship.objects.filter(
-        Q(sender=user, receiver=friend)|Q(sender=friend, receiver=user)
+    query = Friendship.objects.filter(
+        Q(sender=user, receiver=friend) | Q(sender=friend, receiver=user)
     )
 
     if not query.exists():
@@ -179,4 +203,9 @@ def delete_friend(request, friend_id, **kwargs):
     except OperationalError as e:
         print(f"DATABASE FAILURE {e}", flush=True)
         return response.HttpResponse(*DB_FAILURE)
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(str(friend.id), {
+        "type": "delete_friend",
+        "ids": [user.id, friend.id]
+    })
     return response.HttpResponse()

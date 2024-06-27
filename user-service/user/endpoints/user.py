@@ -86,8 +86,10 @@ def get_user(request, user_id):
     except User.DoesNotExist:
         return response.HttpResponse(*NO_USER)
     status = cache.get(user.id)
-    if status is None:
+    if status is None or status == 0:
         status = "disconnected"
+    else:
+        status = "connected"
     return response.JsonResponse({
         "id": user.id,
         "login": user.login,
