@@ -136,11 +136,7 @@ def get_friends(request, **kwargs):
     q1 = Friendship.objects.filter(
         Q(sender=user) | Q(receiver=user, accepted=True)
     )
-
-    if not q1.exists():
-        return response.HttpResponse(reason="User has no friend, that's sad")
     data = {friend.pk: model_to_dict(friend) for friend in q1}
-
     return response.JsonResponse(data=data)
 
 
@@ -157,9 +153,6 @@ def get_waiting_friends(request, **kwargs):
     q1 = Friendship.objects.filter(
         receiver=user, accepted=False
     )
-
-    if not q1.exists():
-        return response.HttpResponse(200, "User has no waiting friend, that's sad")
     data = {friend.pk: friend.to_dict() for friend in q1}
     return response.JsonResponse(data=data)
 
