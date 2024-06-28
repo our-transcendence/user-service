@@ -86,9 +86,10 @@ class FriendsConsumer(AsyncJsonWebsocketConsumer):
                     "from": self.id
                 })
                 await self.channel_layer.group_discard(str(self.id), self.channel_name)
-                friends_ids: list = await self.get_friends()
-                for user_id in friends_ids:
-                    await self.channel_layer.group_discard(str(user_id), self.channel_name)
+                friends_ids: list[int] | None = await self.get_friends()
+                if friends_ids is not None:
+                    for user_id in friends_ids:
+                        await self.channel_layer.group_discard(str(user_id), self.channel_name)
             cache.set(self.id, current)
             self.lock.release()
             print("Lock released in disconnect", flush=True)
