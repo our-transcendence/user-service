@@ -118,7 +118,6 @@ def search_user(request, **kwargs):
     # return response.JsonResponse(return_dic)
 
 
-@csrf_exempt
 @ourJWT.Decoder.check_auth()
 @require_http_methods(["POST"])
 def update_user(request: HttpRequest, **kwargs):
@@ -144,7 +143,6 @@ def update_user(request: HttpRequest, **kwargs):
     return response.HttpResponse()
 
 
-@csrf_exempt
 @require_http_methods(["GET"])
 def get_picture(request, user_id):
     try:
@@ -158,7 +156,6 @@ def get_picture(request, user_id):
         return response.HttpResponse(status=404, reason="No picture found")
 
 
-@csrf_exempt
 @ourJWT.Decoder.check_auth()
 @require_http_methods(["DELETE"])
 def delete_user(request, **kwargs):

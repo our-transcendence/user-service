@@ -36,7 +36,6 @@ SAME_USER = b'', None, 403, "Friend and user are the same"
 DB_FAILURE = b'', None,  503, "Database Failure"
 ALREADY_ASKED = b'', None, 409, "Friendship already asked"
 
-@csrf_exempt
 @ourJWT.Decoder.check_auth()
 @require_http_methods(["POST"])
 def add_friend(request, friend_id, **kwargs):
@@ -85,7 +84,6 @@ def add_friend(request, friend_id, **kwargs):
     return response.HttpResponse()
 
 
-@csrf_exempt
 @ourJWT.Decoder.check_auth()
 @require_http_methods(["POST"])
 def accept_friend(request, friend_id, **kwargs):
@@ -104,7 +102,6 @@ def accept_friend(request, friend_id, **kwargs):
     return response.HttpResponse()
 
 
-@csrf_exempt
 @ourJWT.Decoder.check_auth()
 @require_http_methods(["POST"])
 def refuse_friend(request, friend_id, **kwargs):
@@ -123,7 +120,6 @@ def refuse_friend(request, friend_id, **kwargs):
     return response.HttpResponse()
 
 
-@csrf_exempt
 @ourJWT.Decoder.check_auth()
 @require_http_methods(["GET"])
 def get_friends(request, **kwargs):
@@ -140,7 +136,6 @@ def get_friends(request, **kwargs):
     return response.JsonResponse(data=data)
 
 
-@csrf_exempt
 @ourJWT.Decoder.check_auth()
 @require_http_methods(["GET"])
 def get_waiting_friends(request, **kwargs):
@@ -157,7 +152,6 @@ def get_waiting_friends(request, **kwargs):
     return response.JsonResponse(data=data)
 
 
-@csrf_exempt
 @ourJWT.Decoder.check_auth()
 @require_http_methods(["GET"])
 def get_requests(request, **kwargs):
@@ -175,7 +169,6 @@ def get_requests(request, **kwargs):
     return response.JsonResponse(data=data)
 
 
-@csrf_exempt
 @ourJWT.Decoder.check_auth()
 @require_http_methods(["DELETE"])
 def delete_friend(request, friend_id, **kwargs):
