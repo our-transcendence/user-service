@@ -10,7 +10,6 @@ from django.http import response, HttpRequest, HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.core.validators import MinLengthValidator
 from django.forms.models import model_to_dict
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
 from user.models import User
 from django.core.cache import cache
@@ -36,7 +35,6 @@ DB_FAILURE = b'', None, 503, "Database Failure"
 SERVICE_KEY = os.getenv("INTER_SERVICE_KEY")
 
 
-@csrf_exempt  # TODO: Not use in production
 @require_POST
 def create_user(request):
     authorisation = request.headers.get("Authorization")

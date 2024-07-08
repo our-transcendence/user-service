@@ -8,7 +8,6 @@ from django.core import serializers
 from django.shortcuts import get_object_or_404
 from django.forms.models import model_to_dict
 from django.http import response, HttpRequest, Http404
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
 from user.models import User, Friendship
 
