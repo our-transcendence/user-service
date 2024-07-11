@@ -60,7 +60,7 @@ CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 INSTALLED_APPS = [
     'channels',
-    'djangp.contrib.auth',
+    'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
