@@ -3,12 +3,9 @@ import shutil
 import json
 import requests
 
-from django.db.models import Q
 from django.db import OperationalError
-from django.core import serializers
 from django.http import response, HttpRequest, HttpResponse, Http404
 from django.shortcuts import get_object_or_404
-from django.core.validators import MinLengthValidator
 from django.forms.models import model_to_dict
 from django.views.decorators.http import require_POST, require_http_methods
 from user.models import User
@@ -16,6 +13,7 @@ from django.core.cache import cache
 
 import ourJWT.OUR_exception
 
+from user.parsers import parseUserCreationData, ParseError
 from userService import settings
 from user.utils import get_user_from_jwt
 
@@ -42,13 +40,9 @@ def create_user(request):
         return response.HttpResponseForbidden()
 
     try:
-        data = json.loads(request.body)
-    except json.JSONDecodeError as e:
-        return response.HttpResponse(*JSON_DECODE_ERROR)
-
-    expected_keys = {"id", "login", "display_name"}
-    if set(data.keys()) != expected_keys:
-        return response.HttpResponse(*JSON_DECODE_ERROR)
+        data = parseUserCreationData(request.body)
+    except ParseError as e:
+        return e.http_response
 
     user_id = data["id"]
     login = data["login"]
@@ -95,11 +89,12 @@ def get_user(request, user_id):
         "status": status
     })
 
+
 @ourJWT.Decoder.check_auth()
 @require_http_methods(["GET"])
 def search_user(request, **kwargs):
     to_search = request.GET.get("search_for")
-    if to_search is None:
+    if to_search is not str:
         return response.HttpResponseBadRequest()
 
     print(f'searhcing for : {to_search}', flush=True)
@@ -112,7 +107,7 @@ def search_user(request, **kwargs):
         # return_dic[user.id] = model_to_dict(user)
         # print(f'hello there: {return_dic}', flush=True)
 
-    return response.JsonResponse({"result":return_array})
+    return response.JsonResponse({"result": return_array})
     # return response.JsonResponse(return_dic)
 
 
@@ -163,7 +158,7 @@ def delete_user(request, **kwargs):
     except Http404:
         return response.HttpResponse(*NO_USER)
 
-    #delete user from auth-service
+    # delete user from auth-service
     try:
         delete_header = {"Authorization": SERVICE_KEY}
         auth_response = requests.delete(f"{settings.AUTH_SERVICE_URL}/delete/{user.id}",
@@ -174,7 +169,7 @@ def delete_user(request, **kwargs):
     if auth_response.status_code != 200:
         return response.HttpResponse(status=auth_response.status_code, reason=auth_response.text)
 
-    #delete user from stats service
+    # delete user from stats service
     try:
         stats_response = requests.delete(f"{settings.STATS_SERVICE_URL}/stats/{user.id}/delete",
                                          headers=delete_header,
@@ -184,7 +179,7 @@ def delete_user(request, **kwargs):
     if stats_response.status_code != 200:
         return response.HttpResponse(status=stats_response.status_code, reason=stats_response.text)
 
-    #delete user from history service
+    # delete user from history service
     try:
         delete_data = {"player_id": user.id}
         history_response: requests.Response = requests.delete(f"{settings.HISTORY_SERVICE_URL}/playerdelete",
