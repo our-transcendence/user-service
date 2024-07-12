@@ -94,21 +94,17 @@ def get_user(request, user_id):
 @require_http_methods(["GET"])
 def search_user(request, **kwargs):
     to_search = request.GET.get("search_for")
-    if to_search is not str:
+    if isinstance(to_search, str):
         return response.HttpResponseBadRequest()
 
     print(f'searhcing for : {to_search}', flush=True)
     search_result = User.objects.filter(displayName=to_search)
 
-    # return_dic: dict = {}
     return_array = []
     for user in search_result:
         return_array.append(model_to_dict(user))
-        # return_dic[user.id] = model_to_dict(user)
-        # print(f'hello there: {return_dic}', flush=True)
 
     return response.JsonResponse({"result": return_array})
-    # return response.JsonResponse(return_dic)
 
 
 @ourJWT.Decoder.check_auth()
