@@ -94,7 +94,7 @@ def get_user(request, user_id):
 @require_http_methods(["GET"])
 def search_user(request, **kwargs):
     to_search = request.GET.get("search_for")
-    if isinstance(to_search, str):
+    if not isinstance(to_search, str):
         return response.HttpResponseBadRequest()
 
     print(f'searhcing for : {to_search}', flush=True)

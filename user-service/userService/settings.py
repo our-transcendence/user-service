@@ -32,18 +32,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-25xils$5ig0gmm)5(jq@!#@qrzo*&bd)3)x$nxy4+q^8z7)pj='
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
-    '82.64.223.220',
-    '127.0.0.1',
-    'localhost',
-    'auth-nginx',
-    'user-nginx',
-    'history-nginx',
-    'our-transcendence.games',
-    'stats-nginx',
-    os.getenv("HOST", "127.0.0.1"),
+'*'
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -68,7 +60,6 @@ CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 INSTALLED_APPS = [
     'channels',
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
